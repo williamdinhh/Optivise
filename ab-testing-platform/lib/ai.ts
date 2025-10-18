@@ -1,10 +1,8 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-export default openai;
+export default genAI;
 
 export async function generateVariants(
   prompt: string,
@@ -43,17 +41,15 @@ Requested changes: ${prompt}
 Generate ${count} variant(s) that implement these changes with real, visible differences.`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.8,
-      max_tokens: 3000,
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.0-flash-exp'
     });
-
-    const responseText = completion.choices[0]?.message?.content || '[]';
+    
+    const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
+    
+    const result = await model.generateContent(fullPrompt);
+    const response = result.response;
+    const responseText = response.text();
     
     // Clean up the response to extract JSON
     let cleanedResponse = responseText.trim();
@@ -69,7 +65,7 @@ Generate ${count} variant(s) that implement these changes with real, visible dif
     console.error('Error generating variants:', error);
     console.error('Error details:', error.message);
     if (error.response) {
-      console.error('OpenAI API error:', error.response.data);
+      console.error('Gemini API error:', error.response.data);
     }
     throw error;
   }
@@ -112,20 +108,15 @@ Variant: ${v.name} (ID: ${v.id})
     .join('\n');
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        {
-          role: 'user',
-          content: `Analyze these A/B test results and determine which variant performed best:\n\n${metricsText}`,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.0-flash-exp'
     });
-
-    const responseText = completion.choices[0]?.message?.content || '{}';
+    
+    const fullPrompt = `${systemPrompt}\n\nAnalyze these A/B test results and determine which variant performed best:\n\n${metricsText}`;
+    
+    const result = await model.generateContent(fullPrompt);
+    const response = result.response;
+    const responseText = response.text();
     
     // Clean up the response
     let cleanedResponse = responseText.trim();
@@ -135,9 +126,10 @@ Variant: ${v.name} (ID: ${v.id})
     
     const analysis = JSON.parse(cleanedResponse);
     return analysis;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error analyzing variants:', error);
-    throw new Error('Failed to analyze variants');
+    console.error('Error details:', error.message);
+    throw error;
   }
 }
 
