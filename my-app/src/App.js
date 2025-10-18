@@ -1,7 +1,13 @@
+//statsig imports: 
+import { StatsigProvider, useClientAsyncInit } from '@statsig/react-bindings';
+import { StatsigAutoCapturePlugin } from '@statsig/web-analytics';
+import { StatsigSessionReplayPlugin } from '@statsig/session-replay';
+import { useStatsigClient } from '@statsig/react-bindings';
+
 import logo from './logo.svg';
 import './App.css';
 
-function App() {
+function AppContent() {
   return (
     <div className="App">
       <header className="App-header">
@@ -20,6 +26,23 @@ function App() {
       </header>
     </div>
   );
+
+  
 }
+
+function App() {
+  const { client } = useClientAsyncInit(
+    "client-qFzSZVimIzwC9zb8mM91G0qkiAL4lEOCoj6vTHsq2Sa",
+    { userID: 'a-user' }, 
+    { plugins: [ new StatsigAutoCapturePlugin(), new StatsigSessionReplayPlugin() ] },
+  );
+
+  return (
+    <StatsigProvider client={client} loadingComponent={<div>Loading...</div>}>
+      <div>Hello Worldc How are u</div>
+    </StatsigProvider>
+  );
+}
+
 
 export default App;
