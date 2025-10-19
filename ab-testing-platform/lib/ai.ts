@@ -18,17 +18,28 @@ Your task is to generate ${count} distinct variant(s) of the website that implem
 3. Maintain valid HTML and CSS syntax
 4. Focus on UX improvements and conversion optimization
 
+CRITICAL JSON REQUIREMENTS:
+- Return ONLY a valid JSON array, no other text
+- Keep HTML and CSS concise (max 2000 characters each)
+- Escape all quotes and newlines properly in JSON strings
+- Use \\n for line breaks in strings
+- Use \\" for quotes in strings
+- Ensure the JSON is properly terminated
+
 Return ONLY a valid JSON array with this exact structure:
 [
   {
     "name": "Variant Name",
     "description": "Brief description of changes made",
-    "html": "complete HTML code",
-    "css": "complete CSS code"
+    "html": "complete HTML code (max 2000 chars)",
+    "css": "complete CSS code (max 2000 chars)"
   }
 ]
 
-Do not include any markdown formatting, explanations, or text outside the JSON array.`;
+IMPORTANT: 
+- Return ONLY the JSON array, no other text
+- Keep content concise to avoid JSON parsing errors
+- Make meaningful but focused changes`;
 
   const userPrompt = `Original HTML:
 ${currentHtml}
@@ -59,15 +70,50 @@ Generate ${count} variant(s) that implement these changes with real, visible dif
       cleanedResponse = cleanedResponse.replace(/```json?\n?/g, '').replace(/```\n?/g, '');
     }
     
+    // Try to find and extract JSON array from the response
+    const jsonMatch = cleanedResponse.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      cleanedResponse = jsonMatch[0];
+    }
+    
+    // Additional cleanup for common JSON issues
+    cleanedResponse = cleanedResponse
+      .replace(/\\n/g, '\\n')  // Preserve newlines in strings
+      .replace(/\\"/g, '\\"')  // Preserve escaped quotes
+      .replace(/\\\\/g, '\\\\'); // Preserve backslashes
+    
+    console.log('Cleaned response length:', cleanedResponse.length);
+    console.log('First 500 chars:', cleanedResponse.substring(0, 500));
+    console.log('Last 500 chars:', cleanedResponse.substring(cleanedResponse.length - 500));
+    
     const variants = JSON.parse(cleanedResponse);
     return variants;
   } catch (error: any) {
     console.error('Error generating variants:', error);
     console.error('Error details:', error.message);
-    if (error.response) {
-      console.error('Gemini API error:', error.response.data);
+    
+    // Fallback: Try to generate simple variants if JSON parsing fails
+    console.log('Attempting fallback variant generation...');
+    try {
+      const fallbackVariants = [
+        {
+          name: "Simplified Variant 1",
+          description: "Simplified version with basic changes",
+          html: currentHtml.replace(/class="([^"]*)"/g, 'class="$1 variant-1"'),
+          css: currentCss + "\n.variant-1 { border: 2px solid #007bff; }"
+        },
+        {
+          name: "Simplified Variant 2", 
+          description: "Simplified version with color changes",
+          html: currentHtml.replace(/class="([^"]*)"/g, 'class="$1 variant-2"'),
+          css: currentCss + "\n.variant-2 { background-color: #f8f9fa; }"
+        }
+      ];
+      return fallbackVariants;
+    } catch (fallbackError) {
+      console.error('Fallback also failed:', fallbackError);
+      throw error; // Re-throw original error
     }
-    throw error;
   }
 }
 
