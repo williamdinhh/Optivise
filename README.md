@@ -1,7 +1,4 @@
 # Optivise - AI-Powered A/B Testing Platform
-
-To Run:
-
 # Clone and setup
 
 git clone <your-repo-url> </br>
