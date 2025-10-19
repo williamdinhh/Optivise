@@ -122,7 +122,23 @@ export default function Home() {
           >
             Quick Actions
           </h3>
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <a
+              href={`/site?variant=${currentVariant.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: "10px 20px",
+                border: "2px solid #000",
+                background: "#000",
+                color: "#fff",
+                textDecoration: "none",
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              🌐 Open Website in New Tab
+            </a>
             <Link
               href="/dashboard"
               style={{

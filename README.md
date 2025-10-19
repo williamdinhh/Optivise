@@ -3,19 +3,24 @@
 To Run:
 
 # Clone and setup
+
 git clone <your-repo-url>
 cd Optivise
 npm install
 
 # Add your Gemini API key & Statsig Local + Secret Key
+
 GEMINI_API_KEY==
 NEXT_PUBLIC_STATSIG_CLIENT_KEY=
 STATSIG_CONSOLE_KEY=
+
 > .env.local
 
 # Start development server
+
 npm run dev
-```
+
+````
 Open [http://localhost:3000](http://localhost:3000) and start testing!
 
 ## ✨ What Makes Optivise Special
@@ -46,7 +51,8 @@ Get AI-powered insights with:
 ### AI Variant Generation
 - **Natural Language Input**: "Make the signup button more prominent"
 - **Real Code Changes**: Actual HTML/CSS modifications, not just suggestions
-- **Auto-Generation**: One-click optimal variant suggestions
+- **🤖 AI-Powered Auto-Generation**: Gemini analyzes your current variant and generates intelligent, context-aware optimization suggestions
+- **Smart Prompts**: AI creates specific, actionable prompts based on UX best practices
 - **Multiple Variants**: Generate 1-3 variants simultaneously
 
 ### Live Preview System
@@ -70,6 +76,40 @@ Get AI-powered insights with:
 - **Color-coded Output**: Easy-to-read results
 - **One-click Application**: Apply winners directly
 
+## 🎯 How to Use
+
+### Quick Start - Generate Your First Variant
+
+1. **Go to Dashboard** - Click "Dashboard" from the home page
+2. **Navigate to Variant Generator** - Select "Variant Generator" from the sidebar
+3. **Choose Your Method**:
+
+#### Method A: AI Auto-Generate (Recommended! 🤖)
+- Click **"🤖 Auto-Generate with AI"** button
+- The AI analyzes your current variant's HTML and CSS
+- Gemini generates an intelligent, context-aware optimization suggestion
+- Example: "Make the CTA button 30% larger with a pulsing animation"
+- The prompt auto-fills and variants are generated automatically
+- **No thinking required** - AI does all the creative work!
+
+#### Method B: Custom Prompt
+- Type your own optimization idea (e.g., "Change the hero background to gradient blue")
+- Select how many variants to generate (1-3)
+- Click "Generate Variants"
+
+4. **Preview & Test** - Switch between variants to compare
+5. **Track Performance** - Enable capture and interact with variants
+6. **Analyze Results** - View metrics and AI-powered insights
+7. **Apply Winner** - Deploy the best-performing variant
+
+### Using the Standalone Website
+
+- Click **"🌐 Open Website in New Tab"** from anywhere
+- Share `/site` URL with team members or testers
+- Each visitor sees a random active variant (real A/B testing simulation)
+- All impressions and interactions are automatically tracked
+- Perfect for gathering authentic user behavior data
+
 ## 🏗️ Architecture
 
 ### Frontend (Next.js + React)
@@ -79,6 +119,7 @@ Get AI-powered insights with:
 - **Analytics Panel**: Real-time metrics display
 
 ### Backend (Next.js API Routes)
+- **`/api/prompts/generate`**: 🤖 AI-powered prompt generation (NEW!)
 - **`/api/variants/generate`**: AI variant generation
 - **`/api/variants`**: CRUD operations for variants
 - **`/api/analyze`**: AI-powered analysis and insights
@@ -86,49 +127,13 @@ Get AI-powered insights with:
 - **`/api/config`**: Configuration management
 
 ### Core Libraries
-- **`lib/ai.ts`**: OpenAI API integration
+- **`lib/ai.ts`**: AI API integration (Gemini)
+  - `generateVariants()`: Create HTML/CSS variants
+  - `generateOptimizationPrompt()`: 🤖 AI prompt generation (NEW!)
+  - `analyzeVariants()`: Performance analysis
 - **`lib/event-tracker.ts`**: User behavior simulation
 - **`lib/storage.ts`**: File-based data persistence
 - **`lib/statsig-*.ts`**: Analytics and feature flagging
-
-## 📊 Metrics Tracked
-
-| Metric | Description | Good Range |
-|--------|-------------|------------|
-| **Impressions** | Total page views | 1000-1500 |
-| **Click-Through Rate** | Percentage who clicked | 5-12% |
-| **Conversion Rate** | Percentage who converted | 2-8% |
-| **Avg Time on Page** | Engagement duration | 60-120s |
-| **Bounce Rate** | Immediate exits | 30-50% |
-
-## 📁 Project Structure
-
-```
-Optivise/
-├── app/                    # Next.js App Router
-│   ├── api/               # Backend API routes
-│   ├── dashboard/         # Main dashboard page
-│   └── test-analytics/    # Analytics testing page
-├── components/            # React components
-│   ├── AnalyticsPanel.tsx
-│   ├── CapturePanel.tsx
-│   ├── DemoWebsite.tsx
-│   ├── ModeratorDashboard.tsx
-│   └── StatsigProvider.tsx
-├── lib/                   # Core libraries
-│   ├── ai.ts             # AI integration
-│   ├── event-tracker.ts  # Event tracking
-│   ├── storage.ts        # Data persistence
-│   └── statsig-*.ts      # Analytics integration
-├── data/                  # Generated data
-│   ├── config.json       # Variants storage
-│   ├── events.json       # Event data
-│   └── history.json      # Historical data
-├── scripts/              # CLI tools
-│   └── analyze.ts        # Terminal analytics
-└── types/                # TypeScript definitions
-    └── index.ts
-```
 
 
 ## 🎯 Use Cases
@@ -165,11 +170,12 @@ git commit -m "Initial commit"
 # Push to GitHub
 git remote add origin https://github.com/your-username/optivise.git
 git push -u origin main
-```
+````
 
 ### Step 2: Deploy to Vercel
 
 #### Option A: Deploy via Vercel Dashboard
+
 1. Go to [vercel.com](https://vercel.com) and sign in
 2. Click "New Project"
 3. Import your GitHub repository
@@ -177,6 +183,7 @@ git push -u origin main
 5. Click "Deploy"
 
 #### Option B: Deploy via Vercel CLI
+
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -200,14 +207,16 @@ vercel
 
 In your Vercel dashboard, go to **Settings > Environment Variables** and add:
 
-| Variable | Value | Environment |
-|----------|-------|-------------|
-| `GEMINI_API_KEY` | `your_gemini_api_key` | Production, Preview, Development |
-| `NEXT_PUBLIC_STATSIG_CLIENT_KEY` | `your_statsig_client_key` | Production, Preview, Development |
-| `STATSIG_CONSOLE_KEY` | `your_statsig_console_key` | Production, Preview, Development |
+| Variable                         | Value                      | Environment                      |
+| -------------------------------- | -------------------------- | -------------------------------- |
+| `GEMINI_API_KEY`                 | `your_gemini_api_key`      | Production, Preview, Development |
+| `NEXT_PUBLIC_STATSIG_CLIENT_KEY` | `your_statsig_client_key`  | Production, Preview, Development |
+| `STATSIG_CONSOLE_KEY`            | `your_statsig_console_key` | Production, Preview, Development |
 
 ### Step 4: Redeploy
+
 After adding environment variables:
+
 ```bash
 # If using CLI
 vercel --prod
@@ -216,6 +225,7 @@ vercel --prod
 ```
 
 ### 🎉 You're Live!
+
 Your app will be available at: `https://your-project-name.vercel.app`
 
 ### 🔧 Build Configuration
@@ -231,6 +241,7 @@ Your `next.config.ts` is already optimized for Vercel. No changes needed!
 ### 🚨 Troubleshooting
 
 #### Build Fails
+
 ```bash
 # Test build locally first
 npm run build
@@ -240,11 +251,13 @@ npx tsc --noEmit
 ```
 
 #### Environment Variables Not Working
+
 - Ensure variables are set in Vercel dashboard
 - Redeploy after adding variables
 - Check variable names match exactly
 
 #### API Routes Not Working
+
 - Verify API keys are correct
 - Check Vercel function logs
 - Test endpoints locally first
@@ -252,49 +265,11 @@ npx tsc --noEmit
 ### 🔄 Continuous Deployment
 
 Once connected to GitHub:
+
 - Every push to `main` triggers automatic deployment
 - Pull requests create preview deployments
 - Branch deployments for testing
 
 ## 🔮 Future Enhancements
-
-- [ ] Real user tracking integration
-- [ ] Advanced visualizations in web UI
-- [ ] Multi-page testing support
-- [ ] Database integration (PostgreSQL)
-- [ ] Multi-user authentication
-- [ ] Export reports (PDF, CSV)
-- [ ] Real-time metrics updates
-- [ ] Version control for variants
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Google Gemini for AI capabilities
-- Statsig for analytics platform
-- Next.js team for the amazing framework
-- Tailwind CSS for beautiful styling
-
-## 📞 Support
-
-- 📖 **Documentation**: See `docs/` folder for detailed guides
-- 🐛 **Issues**: Report bugs via GitHub Issues
-- 💬 **Discussions**: Join GitHub Discussions for questions
-- 📧 **Contact**: [Your contact information]
-
----
-
-**Built with ❤️ for developers who want to move fast and build amazing things.**
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/optivise)

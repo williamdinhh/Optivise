@@ -162,10 +162,29 @@ export default function Dashboard() {
               textDecoration: "none",
               color: "#000",
               fontSize: "14px",
+              marginBottom: "10px",
             }}
           >
             View Live Site
           </Link>
+          <a
+            href={`/site?variant=${currentVariant.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "block",
+              padding: "8px 12px",
+              border: "2px solid #000",
+              textAlign: "center",
+              textDecoration: "none",
+              color: "#000",
+              fontSize: "14px",
+              fontWeight: "bold",
+              background: "#f0f0f0",
+            }}
+          >
+            🌐 Open Website (New Tab)
+          </a>
         </div>
       </aside>
 
@@ -562,6 +581,23 @@ export default function Dashboard() {
                 >
                   Run Analytics
                 </button>
+                <a
+                  href={`/site?variant=${currentVariant.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: "10px 20px",
+                    border: "2px solid #000",
+                    background: "#000",
+                    textDecoration: "none",
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    display: "inline-block",
+                  }}
+                >
+                  🌐 Open Website in New Tab
+                </a>
                 <Link
                   href="/"
                   style={{

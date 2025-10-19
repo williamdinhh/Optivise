@@ -18,6 +18,7 @@ export default function ModeratorDashboard({
   const [loading, setLoading] = useState(false);
   const [variantCount, setVariantCount] = useState(2);
   const [message, setMessage] = useState("");
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
 
   useEffect(() => {
     loadVariants();
@@ -92,19 +93,46 @@ export default function ModeratorDashboard({
   };
 
   const handleAutoGenerate = async () => {
-    const autoPrompts = [
-      "Make the call-to-action button more prominent and eye-catching",
-      "Improve the hero section with better visual hierarchy",
-      "Optimize the layout for higher conversion rates",
-    ];
+    setIsGeneratingPrompt(true);
+    setMessage("");
 
-    const randomPrompt =
-      autoPrompts[Math.floor(Math.random() * autoPrompts.length)];
-    setPrompt(randomPrompt);
+    try {
+      // Call AI to generate an intelligent prompt based on current variant
+      const response = await axios.post("/api/prompts/generate", {
+        currentHtml: currentVariant.html,
+        currentCss: currentVariant.css,
+      });
 
-    setTimeout(() => {
-      handleGenerateVariants();
-    }, 100);
+      const generatedPrompt = response.data.prompt;
+      setPrompt(generatedPrompt);
+      setMessage(`🤖 AI generated prompt: "${generatedPrompt}"`);
+
+      // Automatically start generating variants after a brief delay
+      setTimeout(() => {
+        handleGenerateVariants();
+      }, 1500);
+    } catch (error: any) {
+      console.error("Error generating prompt:", error);
+
+      // Fallback to random selection if AI fails
+      const fallbackPrompts = [
+        "Make the call-to-action button more prominent with a contrasting color and larger size",
+        "Improve the hero section with better visual hierarchy and clear value proposition",
+        "Add visual elements like icons or illustrations to break up text-heavy sections",
+        "Optimize the layout for mobile devices with better spacing and touch targets",
+      ];
+
+      const randomPrompt =
+        fallbackPrompts[Math.floor(Math.random() * fallbackPrompts.length)];
+      setPrompt(randomPrompt);
+      setMessage(`Using fallback prompt (AI unavailable): "${randomPrompt}"`);
+
+      setTimeout(() => {
+        handleGenerateVariants();
+      }, 1500);
+    } finally {
+      setIsGeneratingPrompt(false);
+    }
   };
 
   return (
@@ -189,16 +217,18 @@ export default function ModeratorDashboard({
           </button>
           <button
             onClick={handleAutoGenerate}
-            disabled={loading}
+            disabled={loading || isGeneratingPrompt}
             style={{
               padding: "10px 20px",
               fontSize: "14px",
               border: "1px solid #000",
-              background: loading ? "#ccc" : "#fff",
-              cursor: loading ? "not-allowed" : "pointer",
+              background: loading || isGeneratingPrompt ? "#ccc" : "#fff",
+              cursor: loading || isGeneratingPrompt ? "not-allowed" : "pointer",
             }}
           >
-            Auto-Generate
+            {isGeneratingPrompt
+              ? "🤖 AI Thinking..."
+              : "🤖 Auto-Generate with AI"}
           </button>
         </div>
 
