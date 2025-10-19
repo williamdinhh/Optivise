@@ -172,9 +172,9 @@ async function main() {
     }
     
     // Check if using fallback data and warn the user
-    const isUsingFallbackData = analysis.source === 'simulated_fallback' || 
+    const isUsingFallbackData = (analysis as any).source === 'simulated_fallback' || 
                                 (analysis as any).warning;
-    const isUsingLocalEvents = analysis.source === 'local_events_real';
+    const isUsingLocalEvents = (analysis as any).source === 'local_events_real';
     
     if (isUsingFallbackData) {
       console.log('\n\x1b[43m\x1b[30m                                                                           \x1b[0m');
