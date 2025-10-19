@@ -5,6 +5,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 // Log API key status (without exposing the key)
 if (process.env.GEMINI_API_KEY) {
   console.log('✅ Gemini API key is configured');
+  console.log('🔑 API Key starts with:', process.env.GEMINI_API_KEY.substring(0, 10) + '...');
 } else {
   console.warn('⚠️  GEMINI_API_KEY not set - AI features will not work');
 }
@@ -62,7 +63,7 @@ Generate ${count} variant(s) that implement these changes with real, visible dif
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
     });
 
     const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
@@ -164,7 +165,7 @@ Generate ONE creative, specific optimization suggestion for this website:`;
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
     });
 
     const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
@@ -246,7 +247,7 @@ Variant: ${v.name} (ID: ${v.id})
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
     });
 
     const fullPrompt = `${systemPrompt}\n\nAnalyze these A/B test results and determine which variant performed best. You MUST choose a winner based on the available data, even if the differences are small or the data is limited:\n\n${metricsText}\n\nRemember: Always provide a winner. Consider the overall performance trends and pick the variant that shows the most promise.`;
@@ -276,6 +277,30 @@ Variant: ${v.name} (ID: ${v.id})
   } catch (error: any) {
     console.error("Error analyzing variants:", error);
     console.error("Error details:", error.message);
+    
+    // Handle quota exceeded error
+    if (error.message && error.message.includes("quota")) {
+      console.warn("⚠️  Gemini API quota exceeded - providing fallback analysis");
+      
+      // Return a fallback analysis based on the data
+      const fallbackAnalysis = {
+        winner: variants.length > 0 ? variants[0].id : null,
+        summary: "AI analysis unavailable due to API quota limits. Please try again later or upgrade your Gemini API plan.",
+        insights: [
+          "API quota exceeded - analysis unavailable",
+          "Consider upgrading your Gemini API plan",
+          "Try again when quota resets"
+        ],
+        recommendations: [
+          "Try again in a few minutes when quota resets",
+          "Consider upgrading your Gemini API plan for higher limits",
+          "Check your API usage in Google AI Studio"
+        ]
+      };
+      
+      return fallbackAnalysis;
+    }
+    
     throw error;
   }
 }
