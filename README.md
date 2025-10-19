@@ -10,9 +10,9 @@ npm install
 
 # Add your Gemini API key & Statsig Local + Secret Key
 
-GEMINI_API_KEY==
-NEXT_PUBLIC_STATSIG_CLIENT_KEY=
-STATSIG_CONSOLE_KEY=
+GEMINI_API_KEY== </br>
+NEXT_PUBLIC_STATSIG_CLIENT_KEY= </br>
+STATSIG_CONSOLE_KEY= </br>
 
 > .env.local
 
