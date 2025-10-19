@@ -63,7 +63,7 @@ Generate ${count} variant(s) that implement these changes with real, visible dif
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash-exp",
     });
 
     const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
@@ -165,7 +165,7 @@ Generate ONE creative, specific optimization suggestion for this website:`;
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash-exp",
     });
 
     const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
@@ -247,7 +247,7 @@ Variant: ${v.name} (ID: ${v.id})
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash-exp",
     });
 
     const fullPrompt = `${systemPrompt}\n\nAnalyze these A/B test results and determine which variant performed best. You MUST choose a winner based on the available data, even if the differences are small or the data is limited:\n\n${metricsText}\n\nRemember: Always provide a winner. Consider the overall performance trends and pick the variant that shows the most promise.`;
