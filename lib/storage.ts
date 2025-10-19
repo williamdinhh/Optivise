@@ -1,14 +1,10 @@
-import fs from "fs";
-import path from "path";
 import { SiteConfig, Variant } from "@/types";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const CONFIG_FILE = path.join(DATA_DIR, "config.json");
+// Vercel-compatible storage using environment variables
+// This is a simple in-memory storage that resets on each serverless function invocation
+// For production, you'd want to use a database like Vercel KV, Supabase, or similar
 
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
+let memoryConfig: SiteConfig | null = null;
 
 // Initialize with default config if doesn't exist
 const defaultConfig: SiteConfig = {
@@ -298,21 +294,14 @@ const defaultConfig: SiteConfig = {
   },
 };
 
-if (!fs.existsSync(CONFIG_FILE)) {
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(defaultConfig, null, 2));
-}
-
 export function getConfig(): SiteConfig {
-  try {
-    const data = fs.readFileSync(CONFIG_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch (error) {
-    return defaultConfig;
-  }
+  // Return memory config if available, otherwise return default
+  return memoryConfig || defaultConfig;
 }
 
 export function saveConfig(config: SiteConfig): void {
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
+  // Store in memory (resets on each serverless function invocation)
+  memoryConfig = config;
 }
 
 export function addVariant(variant: Variant): void {

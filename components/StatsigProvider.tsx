@@ -17,25 +17,29 @@ export default function StatsigProvider({
   children,
   userID = "anonymous-user",
 }: StatsigProviderWrapperProps) {
+  // Only initialize Statsig if we have a client key
+  const statsigClientKey = process.env.NEXT_PUBLIC_STATSIG_CLIENT_KEY;
+  
   const { client } = useClientAsyncInit(
-    process.env.NEXT_PUBLIC_STATSIG_CLIENT_KEY || "",
+    statsigClientKey || "client-dummy-key",
     { userID },
     {
-      plugins: [
+      plugins: statsigClientKey ? [
         new StatsigAutoCapturePlugin(),
-        new StatsigSessionReplayPlugin  (),
-      ],
+        new StatsigSessionReplayPlugin(),
+      ] : [],
       // Add error handling for network issues
       environment: { tier: "development" },
+      // Disable logging if no key is provided
+      disableLogging: !statsigClientKey,
     }
   );
 
   useEffect(() => {
-    if (client) {
+    if (client && statsigClientKey) {
       console.log("✅ Statsig Client Initialized:", {
         userID,
-        sdkKey:
-          process.env.NEXT_PUBLIC_STATSIG_CLIENT_KEY?.substring(0, 20) + "...",
+        sdkKey: statsigClientKey.substring(0, 20) + "...",
       });
 
       // Log a test event to verify connection
@@ -48,19 +52,26 @@ export default function StatsigProvider({
       } catch (error) {
         console.warn("⚠️  Statsig event logging error (non-critical):", error);
       }
+    } else if (!statsigClientKey) {
+      console.log("ℹ️  Statsig not configured - running in demo mode");
     }
-  }, [client, userID]);
+  }, [client, userID, statsigClientKey]);
 
   // Suppress Statsig network error messages in console
   useEffect(() => {
     const originalError = console.error;
+    const originalWarn = console.warn;
+    
     console.error = (...args) => {
       // Filter out Statsig registry network errors
       if (
         args.some(
           (arg) =>
             typeof arg === "string" &&
-            (arg.includes("prodregistryv2.org") || arg.includes("[Statsig]"))
+            (arg.includes("prodregistryv2.org") || 
+             arg.includes("beyondwickedmapping.org") ||
+             arg.includes("[Statsig]") ||
+             arg.includes("CORS request did not succeed"))
         )
       ) {
         // Silently ignore Statsig registry errors
@@ -69,8 +80,24 @@ export default function StatsigProvider({
       originalError.apply(console, args);
     };
 
+    console.warn = (...args) => {
+      // Filter out Statsig warnings
+      if (
+        args.some(
+          (arg) =>
+            typeof arg === "string" &&
+            (arg.includes("[Statsig]") || arg.includes("Failed to flush events"))
+        )
+      ) {
+        // Silently ignore Statsig warnings
+        return;
+      }
+      originalWarn.apply(console, args);
+    };
+
     return () => {
       console.error = originalError;
+      console.warn = originalWarn;
     };
   }, []);
 

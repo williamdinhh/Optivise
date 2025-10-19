@@ -1,8 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-
-const HISTORY_FILE = path.join(process.cwd(), "data", "history.json");
 
 interface HistoryEntry {
   id: string;
@@ -11,29 +7,16 @@ interface HistoryEntry {
   data: any;
 }
 
+// In-memory storage (resets on each serverless function invocation)
+let memoryHistory: HistoryEntry[] = [];
+
 function getHistory(): HistoryEntry[] {
-  try {
-    if (!fs.existsSync(HISTORY_FILE)) {
-      return [];
-    }
-    const data = fs.readFileSync(HISTORY_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("Error reading history:", error);
-    return [];
-  }
+  return memoryHistory;
 }
 
 function saveHistory(history: HistoryEntry[]): void {
-  try {
-    const dataDir = path.join(process.cwd(), "data");
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
-  } catch (error) {
-    console.error("Error saving history:", error);
-  }
+  memoryHistory = history;
+  console.log(`📚 History updated: ${history.length} entries`);
 }
 
 // GET: Retrieve history
@@ -114,9 +97,8 @@ export async function POST(request: NextRequest) {
 // DELETE: Clear history
 export async function DELETE() {
   try {
-    if (fs.existsSync(HISTORY_FILE)) {
-      fs.unlinkSync(HISTORY_FILE);
-    }
+    memoryHistory = [];
+    console.log("🗑️ History cleared");
     return NextResponse.json({
       success: true,
       message: "History cleared",

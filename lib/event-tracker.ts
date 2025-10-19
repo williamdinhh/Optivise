@@ -3,10 +3,8 @@
  * Stores events locally for analysis while also sending to Statsig
  */
 
-import fs from 'fs';
-import path from 'path';
-
-const EVENTS_FILE = path.join(process.cwd(), 'data', 'events.json');
+// In-memory storage (resets on each serverless function invocation)
+let memoryEvents: TrackedEvent[] = [];
 
 export interface TrackedEvent {
   eventName: string;
@@ -19,16 +17,7 @@ export interface TrackedEvent {
  * Read all stored events
  */
 export function getStoredEvents(): TrackedEvent[] {
-  try {
-    if (!fs.existsSync(EVENTS_FILE)) {
-      return [];
-    }
-    const data = fs.readFileSync(EVENTS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading events file:', error);
-    return [];
-  }
+  return memoryEvents;
 }
 
 /**
@@ -36,18 +25,14 @@ export function getStoredEvents(): TrackedEvent[] {
  */
 export function storeEvent(event: TrackedEvent) {
   try {
-    const events = getStoredEvents();
-    events.push(event);
+    memoryEvents.push(event);
     
-    // Keep only last 10,000 events to prevent file from growing too large
-    const recentEvents = events.slice(-10000);
-    
-    const dataDir = path.join(process.cwd(), 'data');
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
+    // Keep only last 10,000 events to prevent memory from growing too large
+    if (memoryEvents.length > 10000) {
+      memoryEvents = memoryEvents.slice(-10000);
     }
     
-    fs.writeFileSync(EVENTS_FILE, JSON.stringify(recentEvents, null, 2));
+    console.log(`📊 Event stored: ${event.eventName} for variant ${event.variantId}`);
   } catch (error) {
     console.error('Error storing event:', error);
   }
@@ -57,13 +42,8 @@ export function storeEvent(event: TrackedEvent) {
  * Clear all stored events
  */
 export function clearEvents() {
-  try {
-    if (fs.existsSync(EVENTS_FILE)) {
-      fs.unlinkSync(EVENTS_FILE);
-    }
-  } catch (error) {
-    console.error('Error clearing events:', error);
-  }
+  memoryEvents = [];
+  console.log('🗑️ All events cleared');
 }
 
 /**
