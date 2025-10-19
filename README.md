@@ -39,13 +39,6 @@ Get AI-powered insights with:
 - Actionable next steps
 - Terminal-based visualizations
 
-### 🎯 **Complete Testing Workflow**
-1. **Generate** variants with natural language prompts
-2. **Preview** changes in real-time with Shadow DOM
-3. **Simulate** realistic user behavior data
-4. **Analyze** results with AI-powered insights
-5. **Apply** winning variants instantly
-
 ## 🎨 Key Features
 
 ### AI Variant Generation
@@ -58,23 +51,14 @@ Get AI-powered insights with:
 ### Live Preview System
 - **Shadow DOM Implementation**: Isolated style rendering
 - **Real-time Switching**: Instant variant comparison
-- **True WYSIWYG**: See exactly what users will experience
-- **Responsive Design**: Works on all screen sizes
+-  See exactly what users will experience
 
-### Synthetic User Simulation
+### Synthetic User Simulation (when no impressions / data are recorded only)
 - **Realistic Metrics**: Statistically plausible data
 - **7 Key Metrics**: Impressions, CTR, conversions, time on page, bounce rate
 - **Meaningful Variation**: Different performance across variants
 - **Instant Generation**: < 1 second simulation time
 
-### Terminal Analytics Interface
-- **Three Viewing Modes**:
-  - Text summary only
-  - ASCII visualizations (bar charts)
-  - Complete detailed view
-- **Interactive Prompts**: Choose your preferred output format
-- **Color-coded Output**: Easy-to-read results
-- **One-click Application**: Apply winners directly
 
 ## 🎯 How to Use
 
@@ -109,32 +93,6 @@ Get AI-powered insights with:
 - Each visitor sees a random active variant (real A/B testing simulation)
 - All impressions and interactions are automatically tracked
 - Perfect for gathering authentic user behavior data
-
-## 🏗️ Architecture
-
-### Frontend (Next.js + React)
-- **Main Dashboard**: Orchestrates all components
-- **Demo Website**: Renders variants using Shadow DOM
-- **Moderator Panel**: Variant management and controls
-- **Analytics Panel**: Real-time metrics display
-
-### Backend (Next.js API Routes)
-- **`/api/prompts/generate`**: 🤖 AI-powered prompt generation (NEW!)
-- **`/api/variants/generate`**: AI variant generation
-- **`/api/variants`**: CRUD operations for variants
-- **`/api/analyze`**: AI-powered analysis and insights
-- **`/api/events`**: Event tracking and simulation
-- **`/api/config`**: Configuration management
-
-### Core Libraries
-- **`lib/ai.ts`**: AI API integration (Gemini)
-  - `generateVariants()`: Create HTML/CSS variants
-  - `generateOptimizationPrompt()`: 🤖 AI prompt generation (NEW!)
-  - `analyzeVariants()`: Performance analysis
-- **`lib/event-tracker.ts`**: User behavior simulation
-- **`lib/storage.ts`**: File-based data persistence
-- **`lib/statsig-*.ts`**: Analytics and feature flagging
-
 
 ## 🎯 Use Cases
 
@@ -271,5 +229,7 @@ Once connected to GitHub:
 - Branch deployments for testing
 
 ## 🔮 Future Enhancements
+- Allow moderators or users to upload their own websites, rather than actually having to modify the code of website in the files
+
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/optivise)
