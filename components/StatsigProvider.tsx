@@ -60,13 +60,18 @@ export default function StatsigProvider({
   // Suppress Statsig network error messages in console
   useEffect(() => {
     const originalError = console.error;
+    const originalWarn = console.warn;
+    
     console.error = (...args) => {
       // Filter out Statsig registry network errors
       if (
         args.some(
           (arg) =>
             typeof arg === "string" &&
-            (arg.includes("prodregistryv2.org") || arg.includes("[Statsig]"))
+            (arg.includes("prodregistryv2.org") || 
+             arg.includes("beyondwickedmapping.org") ||
+             arg.includes("[Statsig]") ||
+             arg.includes("CORS request did not succeed"))
         )
       ) {
         // Silently ignore Statsig registry errors
@@ -75,8 +80,24 @@ export default function StatsigProvider({
       originalError.apply(console, args);
     };
 
+    console.warn = (...args) => {
+      // Filter out Statsig warnings
+      if (
+        args.some(
+          (arg) =>
+            typeof arg === "string" &&
+            (arg.includes("[Statsig]") || arg.includes("Failed to flush events"))
+        )
+      ) {
+        // Silently ignore Statsig warnings
+        return;
+      }
+      originalWarn.apply(console, args);
+    };
+
     return () => {
       console.error = originalError;
+      console.warn = originalWarn;
     };
   }, []);
 
