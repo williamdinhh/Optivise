@@ -22,9 +22,9 @@ let statsigInitialized = false;
 async function initializeStatsig() {
   if (statsigInitialized) return;
   
-  const serverKey = process.env.STATSIG_CONSOLE_KEY;
+  const serverKey = process.env.STATSIG_SERVER_KEY;
   if (!serverKey) {
-    console.warn('⚠️  STATSIG_CONSOLE_KEY not set');
+    console.warn('⚠️  STATSIG_SERVER_KEY not set');
     return;
   }
   
@@ -47,10 +47,10 @@ export async function fetchStatsigEvents(
   eventNames: string[] = ['variant_impression', 'button_click', 'element_click'],
   limit: number = 1000
 ): Promise<StatsigEvent[]> {
-  const consoleKey = process.env.STATSIG_CONSOLE_KEY;
+  const consoleKey = process.env.STATSIG_CONSOLE_API_KEY;
   
   if (!consoleKey) {
-    console.warn('⚠️  STATSIG_CONSOLE_KEY not set, returning empty events');
+    console.warn('⚠️  STATSIG_CONSOLE_API_KEY not set, returning empty events');
     return [];
   }
 

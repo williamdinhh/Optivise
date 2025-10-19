@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateVariants } from "@/lib/ai";
 import { addVariant } from "@/lib/storage";
 import { Variant } from "@/types";
+import { createStatsigExperiment, createExperimentForVariants } from "@/lib/statsig-experiments";
 import axios from "axios";
 
 export async function POST(request: NextRequest) {
@@ -66,7 +67,33 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ variants: savedVariants });
+    // Create Statsig experiment for the new variants
+    let experimentResult = null;
+    if (process.env.STATSIG_CONSOLE_API_KEY && savedVariants.length > 0) {
+      try {
+        console.log("🔬 Creating Statsig experiment for new variants...");
+        
+        const experimentData = createExperimentForVariants(savedVariants);
+        experimentResult = await createStatsigExperiment(experimentData);
+        
+        if (experimentResult) {
+          console.log("✅ Statsig experiment created:", experimentResult.data.id);
+        } else {
+          console.warn("⚠️  Failed to create Statsig experiment");
+        }
+      } catch (experimentError) {
+        console.error("❌ Error creating Statsig experiment:", experimentError);
+        // Don't fail the entire request if experiment creation fails
+      }
+    } else if (!process.env.STATSIG_CONSOLE_API_KEY) {
+      console.log("ℹ️  STATSIG_CONSOLE_API_KEY not set - skipping experiment creation");
+    }
+
+    return NextResponse.json({ 
+      variants: savedVariants,
+      experiment: experimentResult?.data || null,
+      experimentCreated: !!experimentResult
+    });
   } catch (error) {
     console.error("Error generating variants:", error);
     return NextResponse.json(

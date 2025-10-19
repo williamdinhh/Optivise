@@ -51,9 +51,19 @@ export default function ModeratorDashboard({
         variantCount,
       });
 
-      setMessage(
-        `Successfully generated ${response.data.variants.length} variant(s)!`
-      );
+      let successMessage = `Successfully generated ${response.data.variants.length} variant(s)!`;
+      
+      // Check if Statsig experiment was created
+      if (response.data.experimentCreated && response.data.experiment) {
+        successMessage += `\n🔬 Statsig experiment "${response.data.experiment.name}" created successfully!`;
+        successMessage += `\n📊 Experiment ID: ${response.data.experiment.id}`;
+      } else if (response.data.experimentCreated === false) {
+        successMessage += `\n⚠️  Variants created but Statsig experiment creation failed (check console for details)`;
+      } else {
+        successMessage += `\nℹ️  Statsig experiment creation skipped (STATSIG_CONSOLE_KEY not configured)`;
+      }
+
+      setMessage(successMessage);
       setPrompt("");
       await loadVariants();
     } catch (error: any) {
@@ -345,6 +355,97 @@ export default function ModeratorDashboard({
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Statsig Experiment Management */}
+      <div
+        style={{
+          marginTop: "30px",
+          padding: "20px",
+          border: "2px solid #000",
+          background: "#f8f9fa",
+        }}
+      >
+        <h3
+          style={{
+            fontSize: "16px",
+            fontWeight: "bold",
+            marginTop: 0,
+            marginBottom: "15px",
+          }}
+        >
+          🔬 Statsig Experiment Management
+        </h3>
+        <p style={{ fontSize: "14px", marginBottom: "15px", color: "#666" }}>
+          Create experiments in Statsig for your variants to track performance and get detailed analytics.
+        </p>
+        
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <button
+            onClick={async () => {
+              if (variants.length < 2) {
+                setMessage("You need at least 2 variants to create an experiment");
+                return;
+              }
+              
+              setLoading(true);
+              setMessage("Creating Statsig experiment...");
+              
+              try {
+                const response = await axios.post("/api/experiments/create", {
+                  type: "multiple",
+                  variants: variants.filter(v => v.isActive),
+                  originalVariantId: "original"
+                });
+                
+                if (response.data.success) {
+                  setMessage(`✅ Experiment "${response.data.experiment.name}" created successfully!`);
+                } else {
+                  setMessage("❌ Failed to create experiment");
+                }
+              } catch (error: any) {
+                console.error("Error creating experiment:", error);
+                setMessage(error.response?.data?.error || "Failed to create experiment");
+              } finally {
+                setLoading(false);
+              }
+            }}
+            disabled={loading || variants.length < 2}
+            style={{
+              padding: "10px 20px",
+              border: "2px solid #000",
+              background: variants.length >= 2 ? "#000" : "#ccc",
+              color: variants.length >= 2 ? "#fff" : "#666",
+              cursor: variants.length >= 2 ? "pointer" : "not-allowed",
+              fontSize: "14px",
+              fontWeight: "bold",
+            }}
+          >
+            Create Experiment for All Variants
+          </button>
+          
+          <a
+            href="https://console.statsig.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              padding: "10px 20px",
+              border: "1px solid #000",
+              background: "#fff",
+              color: "#000",
+              textDecoration: "none",
+              fontSize: "14px",
+              display: "inline-block",
+            }}
+          >
+            View Statsig Console →
+          </a>
+        </div>
+        
+        <div style={{ marginTop: "15px", fontSize: "12px", color: "#666" }}>
+          <p><strong>Note:</strong> Experiments are automatically created when you generate new variants.</p>
+          <p><strong>Requirements:</strong> STATSIG_CONSOLE_API_KEY must be configured in your environment variables.</p>
         </div>
       </div>
     </div>
