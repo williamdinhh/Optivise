@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllVariants } from '@/lib/vercel-storage';
+import { getAllVariants } from '@/lib/storage';
 import { analyzeVariants } from '@/lib/ai';
 import axios from 'axios';
 

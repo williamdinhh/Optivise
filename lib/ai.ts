@@ -2,6 +2,13 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
+// Log API key status (without exposing the key)
+if (process.env.GEMINI_API_KEY) {
+  console.log('✅ Gemini API key is configured');
+} else {
+  console.warn('⚠️  GEMINI_API_KEY not set - AI features will not work');
+}
+
 export default genAI;
 
 export async function generateVariants(

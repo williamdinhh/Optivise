@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getConfig, setCurrentVariant } from '@/lib/vercel-storage';
+import { getConfig, setCurrentVariant } from '@/lib/storage';
 
 export async function GET() {
   try {
