@@ -72,8 +72,8 @@ Get AI-powered insights with:
 2. **Vercel Account**: Sign up at https://vercel.com
 3. **API Keys**: Get your Gemini and Statsig keys
 
-### Step 1: Prepare Your Repository
 # Initialize git if not already done
+### Step 1: Prepare Your Repository
 git init
 git add .
 git commit -m "Initial commit"
