@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import DemoWebsite from "@/components/DemoWebsite";
 import ModeratorDashboard from "@/components/ModeratorDashboard";
 import CapturePanel from "@/components/CapturePanel";
+import AnalyticsPanel from "@/components/AnalyticsPanel";
 import { Variant } from "@/types";
 import axios from "axios";
 import Link from "next/link";
@@ -35,6 +36,15 @@ export default function Dashboard() {
       console.error("Error loading config:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApplyVariant = async (variantId: string) => {
+    try {
+      await axios.post('/api/config', { currentVariant: variantId });
+      await loadConfig(); // Reload to get updated current variant
+    } catch (error) {
+      console.error('Failed to apply variant:', error);
     }
   };
 
@@ -244,7 +254,7 @@ export default function Dashboard() {
                           fontSize: "14px",
                         }}
                       >
-                        View Analytics
+                        Run Analytics
                       </button>
                     </li>
                   </ul>
@@ -369,7 +379,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* TESTING & ANALYTICS SECTION (MERGED) */}
+        {/* TESTING & ANALYTICS SECTION */}
         {activeSection === "testing" && (
           <div>
             {/* Statsig Event Capture */}
@@ -394,7 +404,7 @@ export default function Dashboard() {
               />
             </section>
 
-            {/* Analytics */}
+            {/* Analytics Panel */}
             <section
               style={{
                 marginBottom: "30px",
@@ -402,72 +412,7 @@ export default function Dashboard() {
                 border: "1px solid #000",
               }}
             >
-              <h3
-                style={{ fontSize: "16px", fontWeight: "bold", marginTop: 0 }}
-              >
-                Performance Analytics
-              </h3>
-              <div
-                style={{
-                  padding: "15px",
-                  border: "1px solid #ccc",
-                  marginTop: "20px",
-                  background: "#f9f9f9",
-                }}
-              >
-                <p style={{ fontSize: "14px", marginBottom: "10px" }}>
-                  <strong>Note:</strong> Run terminal analysis for detailed
-                  metrics
-                </p>
-                <code style={{ fontSize: "13px" }}>npm run analyze</code>
-              </div>
-
-              <div style={{ marginTop: "30px" }}>
-                <h4
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    marginBottom: "15px",
-                  }}
-                >
-                  Placeholder Metrics
-                </h4>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: "15px",
-                  }}
-                >
-                  <div style={{ border: "1px solid #ccc", padding: "15px" }}>
-                    <div style={{ fontSize: "12px", marginBottom: "5px" }}>
-                      Conversion Rate
-                    </div>
-                    <div style={{ fontSize: "24px" }}>--</div>
-                    <div style={{ fontSize: "11px", marginTop: "5px" }}>
-                      Run simulation first
-                    </div>
-                  </div>
-                  <div style={{ border: "1px solid #ccc", padding: "15px" }}>
-                    <div style={{ fontSize: "12px", marginBottom: "5px" }}>
-                      Click Rate
-                    </div>
-                    <div style={{ fontSize: "24px" }}>--</div>
-                    <div style={{ fontSize: "11px", marginTop: "5px" }}>
-                      Run simulation first
-                    </div>
-                  </div>
-                  <div style={{ border: "1px solid #ccc", padding: "15px" }}>
-                    <div style={{ fontSize: "12px", marginBottom: "5px" }}>
-                      Avg. Time
-                    </div>
-                    <div style={{ fontSize: "24px" }}>--</div>
-                    <div style={{ fontSize: "11px", marginTop: "5px" }}>
-                      Run simulation first
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <AnalyticsPanel onApplyVariant={handleApplyVariant} />
             </section>
           </div>
         )}

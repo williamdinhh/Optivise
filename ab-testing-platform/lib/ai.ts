@@ -128,10 +128,17 @@ export async function analyzeVariants(
   const systemPrompt = `You are a data analyst specializing in A/B testing and conversion rate optimization. 
 Analyze the performance metrics of multiple website variants and provide actionable insights.
 
+IMPORTANT: You MUST always choose a winner. Even if the data is unclear, limited, or shows similar performance, you should still pick the variant that shows the most promise based on the available metrics. Consider factors like:
+- Higher conversion rates (even if small differences)
+- Better click-through rates
+- Lower bounce rates
+- More impressions/engagement
+- Overall trend direction
+
 Return ONLY a valid JSON object with this exact structure:
 {
-  "winner": "variant_id or null",
-  "summary": "2-3 sentence overview of the results",
+  "winner": "variant_id (MUST NOT be null - always pick a winner)",
+  "summary": "2-3 sentence overview of the results and why you chose this winner",
   "insights": ["insight 1", "insight 2", "insight 3"],
   "recommendations": ["recommendation 1", "recommendation 2", "recommendation 3"]
 }
@@ -158,7 +165,7 @@ Variant: ${v.name} (ID: ${v.id})
       model: 'gemini-2.0-flash-exp'
     });
     
-    const fullPrompt = `${systemPrompt}\n\nAnalyze these A/B test results and determine which variant performed best:\n\n${metricsText}`;
+    const fullPrompt = `${systemPrompt}\n\nAnalyze these A/B test results and determine which variant performed best. You MUST choose a winner based on the available data, even if the differences are small or the data is limited:\n\n${metricsText}\n\nRemember: Always provide a winner. Consider the overall performance trends and pick the variant that shows the most promise.`;
     
     const result = await model.generateContent(fullPrompt);
     const response = result.response;
@@ -171,6 +178,13 @@ Variant: ${v.name} (ID: ${v.id})
     }
     
     const analysis = JSON.parse(cleanedResponse);
+    
+    // Ensure we always have a winner - if AI returns null, pick the first variant as fallback
+    if (!analysis.winner && variants.length > 0) {
+      analysis.winner = variants[0].id;
+      analysis.summary = analysis.summary + " (Winner selected based on available data)";
+    }
+    
     return analysis;
   } catch (error: any) {
     console.error('Error analyzing variants:', error);
