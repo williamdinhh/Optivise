@@ -2,7 +2,7 @@
 Dubhacks 2025
 ### 👨‍💻 Made By
 
-**William Dinh** – CS Student @ University of Washington <a href="https://www.linkedin.com/in/williamdinh/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="https://www.linkedin.com/in/williamdinh/" height="20" width="30" /></a>
+**William Dinh** – CE Student @ University of Washington <a href="https://www.linkedin.com/in/williamdinh/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="https://www.linkedin.com/in/williamdinh/" height="20" width="30" /></a>
 </p>
 
 **Sidiq Moltafet** – CS Student @ University of Washington
