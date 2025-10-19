@@ -83,7 +83,13 @@ export default function Home() {
             <h1 style={{ fontSize: "18px", fontWeight: "bold", margin: 0 }}>
               A/B Testing Platform
             </h1>
-            <p style={{ fontSize: "12px", margin: "5px 0 0 0", color: isCapturing ? "#dc2626" : "#666" }}>
+            <p
+              style={{
+                fontSize: "12px",
+                margin: "5px 0 0 0",
+                color: isCapturing ? "#dc2626" : "#666",
+              }}
+            >
               {isCapturing ? "🔴 Recording with Statsig" : "Live Preview"}
             </p>
           </div>
@@ -105,6 +111,60 @@ export default function Home() {
 
       {/* Main Content */}
       <main style={{ padding: "20px" }}>
+        {/* Quick Actions */}
+        <section style={{ marginBottom: "20px" }}>
+          <h3
+            style={{
+              fontSize: "16px",
+              fontWeight: "bold",
+              marginBottom: "10px",
+            }}
+          >
+            Quick Actions
+          </h3>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <Link
+              href="/dashboard"
+              style={{
+                padding: "10px 20px",
+                border: "1px solid #000",
+                textDecoration: "none",
+                color: "#000",
+                fontSize: "14px",
+              }}
+            >
+              Manage Variants
+            </Link>
+            <Link
+              href="/dashboard"
+              style={{
+                padding: "10px 20px",
+                border: "1px solid #000",
+                textDecoration: "none",
+                color: "#000",
+                fontSize: "14px",
+              }}
+            >
+              View Analytics
+            </Link>
+            <a
+              href="https://console.statsig.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: "10px 20px",
+                border: "1px solid #000",
+                background: isCapturing ? "#000" : "#fff",
+                color: isCapturing ? "#fff" : "#000",
+                textDecoration: "none",
+                fontSize: "14px",
+              }}
+            >
+              Statsig Console →
+            </a>
+          </div>
+        </section>
+
         {/* Variant Switcher */}
         <section
           style={{
@@ -158,51 +218,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Statsig Event Capture Control */}
-        <section
-          style={{
-            marginBottom: "20px",
-            padding: "20px",
-            border: isCapturing ? "2px solid #dc2626" : "2px solid #16a34a",
-            background: isCapturing ? "#fef2f2" : "#f0fdf4",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <h2
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  marginTop: 0,
-                  marginBottom: "5px",
-                }}
-              >
-                {isCapturing ? "🔴 Statsig Recording Active" : "⚫ Event Capture"}
-              </h2>
-              <p style={{ fontSize: "14px", margin: 0 }}>
-                {isCapturing
-                  ? "All clicks and interactions are being sent to Statsig in real-time"
-                  : "Click Start to begin tracking user events with Statsig"}
-              </p>
-            </div>
-            <button
-              onClick={() => setIsCapturing(!isCapturing)}
-              style={{
-                padding: "12px 24px",
-                border: `2px solid ${isCapturing ? "#dc2626" : "#16a34a"}`,
-                background: isCapturing ? "#dc2626" : "#16a34a",
-                color: "#fff",
-                fontSize: "14px",
-                fontWeight: "bold",
-                cursor: "pointer",
-                borderRadius: "4px",
-              }}
-            >
-              {isCapturing ? "⏸️ Stop" : "▶️ Start Capture"}
-            </button>
-          </div>
-        </section>
-
         {/* Current Variant Info */}
         <section
           style={{
@@ -251,66 +266,12 @@ export default function Home() {
             <strong>Website Preview</strong> - {new Date().toLocaleString()}
           </div>
           <div>
-            <DemoWebsite 
-              html={currentVariant.html} 
+            <DemoWebsite
+              html={currentVariant.html}
               css={currentVariant.css}
               variantId={currentVariant.id}
               captureEnabled={isCapturing}
             />
-          </div>
-        </section>
-
-        {/* Quick Actions */}
-        <section style={{ marginTop: "20px" }}>
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: "bold",
-              marginBottom: "10px",
-            }}
-          >
-            Quick Actions
-          </h3>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <Link
-              href="/dashboard"
-              style={{
-                padding: "10px 20px",
-                border: "1px solid #000",
-                textDecoration: "none",
-                color: "#000",
-                fontSize: "14px",
-              }}
-            >
-              Manage Variants
-            </Link>
-            <Link
-              href="/dashboard"
-              style={{
-                padding: "10px 20px",
-                border: "1px solid #000",
-                textDecoration: "none",
-                color: "#000",
-                fontSize: "14px",
-              }}
-            >
-              View Analytics
-            </Link>
-            <a
-              href="https://console.statsig.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                padding: "10px 20px",
-                border: "1px solid #000",
-                background: isCapturing ? "#000" : "#fff",
-                color: isCapturing ? "#fff" : "#000",
-                textDecoration: "none",
-                fontSize: "14px",
-              }}
-            >
-              Statsig Console →
-            </a>
           </div>
         </section>
       </main>

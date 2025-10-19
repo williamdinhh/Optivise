@@ -23,7 +23,7 @@ export default function StatsigProvider({
     {
       plugins: [
         new StatsigAutoCapturePlugin(),
-        new StatsigSessionReplayPlugin(),
+        new StatsigSessionReplayPlugin  (),
       ],
       // Add error handling for network issues
       environment: { tier: "development" },

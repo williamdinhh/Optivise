@@ -5,6 +5,7 @@ import DemoWebsite from "@/components/DemoWebsite";
 import ModeratorDashboard from "@/components/ModeratorDashboard";
 import CapturePanel from "@/components/CapturePanel";
 import AnalyticsPanel from "@/components/AnalyticsPanel";
+import HistoryViewer from "@/components/HistoryViewer";
 import { Variant } from "@/types";
 import axios from "axios";
 import Link from "next/link";
@@ -15,10 +16,21 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("overview");
   const [isCapturing, setIsCapturing] = useState(false);
+  const [eventCount, setEventCount] = useState(0);
 
   useEffect(() => {
     loadConfig();
+    fetchEventCount();
   }, []);
+
+  const fetchEventCount = async () => {
+    try {
+      const response = await axios.get("/api/events/export");
+      setEventCount(response.data.totalEvents || 0);
+    } catch (error) {
+      console.error("Error fetching event count:", error);
+    }
+  };
 
   const loadConfig = async () => {
     try {
@@ -41,10 +53,10 @@ export default function Dashboard() {
 
   const handleApplyVariant = async (variantId: string) => {
     try {
-      await axios.post('/api/config', { currentVariant: variantId });
+      await axios.post("/api/config", { currentVariant: variantId });
       await loadConfig(); // Reload to get updated current variant
     } catch (error) {
-      console.error('Failed to apply variant:', error);
+      console.error("Failed to apply variant:", error);
     }
   };
 
@@ -79,6 +91,7 @@ export default function Dashboard() {
     { id: "overview", label: "Overview" },
     { id: "variants", label: "Variant Generator" },
     { id: "testing", label: "Testing & Analytics" },
+    { id: "history", label: "History" },
     { id: "preview", label: "Live Preview" },
   ];
 
@@ -183,8 +196,337 @@ export default function Dashboard() {
         {/* OVERVIEW SECTION */}
         {activeSection === "overview" && (
           <div>
-            {/* Quick Actions */}
+            {/* Current Active Variant */}
+            <section
+              style={{
+                marginBottom: "30px",
+                padding: "20px",
+                border: "2px solid #000",
+                background: "#f8f9fa",
+              }}
+            >
+              <h3
+                style={{ fontSize: "16px", fontWeight: "bold", marginTop: 0 }}
+              >
+                🎯 Current Active Variant
+              </h3>
+              <div style={{ marginTop: "15px" }}>
+                <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                  <strong>Name:</strong> {currentVariant.name}
+                </p>
+                <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                  <strong>Description:</strong> {currentVariant.description}
+                </p>
+                <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                  <strong>Status:</strong>{" "}
+                  <span style={{ color: "#16a34a" }}>● Active</span>
+                </p>
+              </div>
+              <div style={{ marginTop: "15px" }}>
+                <button
+                  onClick={() => setActiveSection("preview")}
+                  style={{
+                    padding: "8px 16px",
+                    border: "1px solid #000",
+                    background: "#fff",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    marginRight: "10px",
+                  }}
+                >
+                  View Preview
+                </button>
+                <button
+                  onClick={() => setActiveSection("variants")}
+                  style={{
+                    padding: "8px 16px",
+                    border: "1px solid #000",
+                    background: "#fff",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
+                >
+                  Switch Variant
+                </button>
+              </div>
+            </section>
+
+            {/* Essential Tools Grid */}
             <section style={{ marginBottom: "30px" }}>
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  marginBottom: "15px",
+                }}
+              >
+                Essential Tools
+              </h3>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "15px",
+                }}
+              >
+                {/* Variant Generator Card */}
+                <div
+                  style={{
+                    border: "2px solid #000",
+                    padding: "20px",
+                    cursor: "pointer",
+                    transition: "background 0.2s",
+                  }}
+                  onClick={() => setActiveSection("variants")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "#f0f0f0")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "#fff")
+                  }
+                >
+                  <div style={{ fontSize: "24px", marginBottom: "10px" }}>
+                    🎨
+                  </div>
+                  <h4
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      margin: "0 0 8px 0",
+                    }}
+                  >
+                    Variant Generator
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      margin: "0 0 12px 0",
+                      color: "#666",
+                    }}
+                  >
+                    Create new AI-powered variants with custom modifications
+                  </p>
+                  <div style={{ fontSize: "12px", color: "#000" }}>
+                    <strong>{allVariants.length}</strong> variants created
+                  </div>
+                </div>
+
+                {/* Analytics Card */}
+                <div
+                  style={{
+                    border: "2px solid #000",
+                    padding: "20px",
+                    cursor: "pointer",
+                    transition: "background 0.2s",
+                  }}
+                  onClick={() => setActiveSection("testing")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "#f0f0f0")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "#fff")
+                  }
+                >
+                  <div style={{ fontSize: "24px", marginBottom: "10px" }}>
+                    📊
+                  </div>
+                  <h4
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      margin: "0 0 8px 0",
+                    }}
+                  >
+                    Analytics & Testing
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      margin: "0 0 12px 0",
+                      color: "#666",
+                    }}
+                  >
+                    View performance metrics and run comparative analysis
+                  </p>
+                  <div style={{ fontSize: "12px", color: "#000" }}>
+                    Run analytics →
+                  </div>
+                </div>
+
+                {/* Live Preview Card */}
+                <div
+                  style={{
+                    border: "2px solid #000",
+                    padding: "20px",
+                    cursor: "pointer",
+                    transition: "background 0.2s",
+                  }}
+                  onClick={() => setActiveSection("preview")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "#f0f0f0")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "#fff")
+                  }
+                >
+                  <div style={{ fontSize: "24px", marginBottom: "10px" }}>
+                    👁️
+                  </div>
+                  <h4
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      margin: "0 0 8px 0",
+                    }}
+                  >
+                    Live Preview
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      margin: "0 0 12px 0",
+                      color: "#666",
+                    }}
+                  >
+                    Preview how your variants look in real-time
+                  </p>
+                  <div style={{ fontSize: "12px", color: "#000" }}>
+                    View preview →
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Data Status */}
+            <section
+              style={{
+                marginBottom: "30px",
+                padding: "20px",
+                border: "2px solid #000",
+                background: "#fff9e6",
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  marginTop: 0,
+                  marginBottom: "15px",
+                }}
+              >
+                📊 Data Status
+              </h3>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: "15px",
+                }}
+              >
+                <div>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      margin: "0 0 5px 0",
+                      color: "#666",
+                    }}
+                  >
+                    <strong>Tracked Events:</strong>
+                  </p>
+                  <p
+                    style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}
+                  >
+                    {eventCount.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      margin: "0 0 5px 0",
+                      color: "#666",
+                    }}
+                  >
+                    <strong>Tracking Status:</strong>
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      margin: 0,
+                      color: isCapturing ? "#dc2626" : "#666",
+                    }}
+                  >
+                    {isCapturing ? "🔴 Active" : "⚫ Inactive"}
+                  </p>
+                </div>
+              </div>
+              <div
+                style={{
+                  marginTop: "15px",
+                  paddingTop: "15px",
+                  borderTop: "1px solid #ddd",
+                }}
+              >
+                <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
+                  💡 <strong>Tip:</strong> Data resets are available in the
+                  Testing & Analytics section
+                </p>
+              </div>
+            </section>
+
+            {/* Statsig Event Tracking Status */}
+            <section
+              style={{
+                marginBottom: "30px",
+                padding: "20px",
+                border: isCapturing ? "2px solid #dc2626" : "2px solid #ccc",
+                background: isCapturing ? "#fef2f2" : "#fff",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <h3
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      marginTop: 0,
+                      marginBottom: "5px",
+                    }}
+                  >
+                    {isCapturing
+                      ? "🔴 Statsig Recording Active"
+                      : "⚫ Event Tracking"}
+                  </h3>
+                  <p style={{ fontSize: "14px", margin: 0, color: "#666" }}>
+                    {isCapturing
+                      ? "Currently tracking user interactions with Statsig"
+                      : "Event tracking is currently inactive"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveSection("testing")}
+                  style={{
+                    padding: "10px 20px",
+                    border: "1px solid #000",
+                    background: "#fff",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
+                >
+                  Manage Tracking
+                </button>
+              </div>
+            </section>
+
+            {/* Quick Actions */}
+            <section>
               <h3
                 style={{
                   fontSize: "16px",
@@ -194,160 +536,62 @@ export default function Dashboard() {
               >
                 Quick Actions
               </h3>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: "15px",
-                }}
-              >
-                <div style={{ border: "1px solid #ccc", padding: "15px" }}>
-                  <h4
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "bold",
-                      margin: "0 0 10px 0",
-                    }}
-                  >
-                    Actions
-                  </h4>
-                  <ul style={{ margin: 0, paddingLeft: "20px" }}>
-                    <li style={{ marginBottom: "8px" }}>
-                      <button
-                        onClick={() => setActiveSection("variants")}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          padding: 0,
-                          textDecoration: "underline",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                        }}
-                      >
-                        Generate New Variant
-                      </button>
-                    </li>
-                    <li style={{ marginBottom: "8px" }}>
-                      <button
-                        onClick={() => setActiveSection("testing")}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          padding: 0,
-                          textDecoration: "underline",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                        }}
-                      >
-                        Run Simulation
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => setActiveSection("testing")}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          padding: 0,
-                          textDecoration: "underline",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                        }}
-                      >
-                        Run Analytics
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-                <div style={{ border: "1px solid #ccc", padding: "15px" }}>
-                  <h4
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "bold",
-                      margin: "0 0 10px 0",
-                    }}
-                  >
-                    Recent Activity
-                  </h4>
-                  <ul
-                    style={{ margin: 0, paddingLeft: "20px", fontSize: "13px" }}
-                  >
-                    <li style={{ marginBottom: "5px" }}>
-                      Variant activated - 2 min ago
-                    </li>
-                    <li style={{ marginBottom: "5px" }}>
-                      New variant generated - 1 hour ago
-                    </li>
-                    <li>Simulation completed - 3 hours ago</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            {/* Current Variant Info */}
-            <section
-              style={{
-                marginBottom: "30px",
-                padding: "20px",
-                border: "2px solid #000",
-              }}
-            >
-              <h3
-                style={{ fontSize: "16px", fontWeight: "bold", marginTop: 0 }}
-              >
-                Current Active Variant
-              </h3>
-              <div style={{ marginTop: "15px" }}>
-                <p style={{ margin: "5px 0" }}>
-                  <strong>Name:</strong> {currentVariant.name}
-                </p>
-                <p style={{ margin: "5px 0" }}>
-                  <strong>Description:</strong> {currentVariant.description}
-                </p>
-                <p style={{ margin: "5px 0" }}>
-                  <strong>Status:</strong> Active
-                </p>
-              </div>
-            </section>
-
-            {/* Key Metrics */}
-            <section style={{ marginBottom: "30px" }}>
-              <h3
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  marginBottom: "15px",
-                }}
-              >
-                Key Metrics
-              </h3>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: "15px",
-                }}
-              >
-                <div style={{ border: "1px solid #000", padding: "15px" }}>
-                  <div style={{ fontSize: "12px", marginBottom: "5px" }}>
-                    Total Variants
-                  </div>
-                  <div style={{ fontSize: "32px", fontWeight: "bold" }}>12</div>
-                </div>
-                <div style={{ border: "1px solid #000", padding: "15px" }}>
-                  <div style={{ fontSize: "12px", marginBottom: "5px" }}>
-                    Active Tests
-                  </div>
-                  <div style={{ fontSize: "32px", fontWeight: "bold" }}>3</div>
-                </div>
-                <div style={{ border: "1px solid #000", padding: "15px" }}>
-                  <div style={{ fontSize: "12px", marginBottom: "5px" }}>
-                    Conversion Rate
-                  </div>
-                  <div style={{ fontSize: "32px", fontWeight: "bold" }}>
-                    4.2%
-                  </div>
-                </div>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => setActiveSection("variants")}
+                  style={{
+                    padding: "10px 20px",
+                    border: "2px solid #000",
+                    background: "#fff",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  + Generate New Variant
+                </button>
+                <button
+                  onClick={() => setActiveSection("testing")}
+                  style={{
+                    padding: "10px 20px",
+                    border: "1px solid #000",
+                    background: "#fff",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
+                >
+                  Run Analytics
+                </button>
+                <Link
+                  href="/"
+                  style={{
+                    padding: "10px 20px",
+                    border: "1px solid #000",
+                    background: "#fff",
+                    textDecoration: "none",
+                    color: "#000",
+                    fontSize: "14px",
+                    display: "inline-block",
+                  }}
+                >
+                  View Live Site
+                </Link>
+                <a
+                  href="https://console.statsig.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: "10px 20px",
+                    border: "1px solid #000",
+                    background: "#fff",
+                    textDecoration: "none",
+                    color: "#000",
+                    fontSize: "14px",
+                    display: "inline-block",
+                  }}
+                >
+                  Open Statsig Console →
+                </a>
               </div>
             </section>
           </div>
@@ -398,7 +642,7 @@ export default function Dashboard() {
               <p style={{ fontSize: "14px", marginBottom: "20px" }}>
                 Track real user interactions in real-time with Statsig
               </p>
-              <CapturePanel 
+              <CapturePanel
                 onCaptureToggle={setIsCapturing}
                 isCapturing={isCapturing}
               />
@@ -413,6 +657,21 @@ export default function Dashboard() {
               }}
             >
               <AnalyticsPanel onApplyVariant={handleApplyVariant} />
+            </section>
+          </div>
+        )}
+
+        {/* HISTORY SECTION */}
+        {activeSection === "history" && (
+          <div>
+            <section
+              style={{
+                marginBottom: "30px",
+                padding: "20px",
+                border: "1px solid #000",
+              }}
+            >
+              <HistoryViewer />
             </section>
           </div>
         )}

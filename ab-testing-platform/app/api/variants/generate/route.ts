@@ -1,19 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { generateVariants } from '@/lib/ai';
-import { addVariant } from '@/lib/storage';
-import { Variant } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { generateVariants } from "@/lib/ai";
+import { addVariant } from "@/lib/storage";
+import { Variant } from "@/types";
+import axios from "axios";
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, currentHtml, currentCss, variantCount = 2 } = await request.json();
+    const {
+      prompt,
+      currentHtml,
+      currentCss,
+      variantCount = 2,
+    } = await request.json();
 
     if (!prompt) {
-      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Prompt is required" },
+        { status: 400 }
+      );
     }
 
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: 'Gemini API key not configured' },
+        { error: "Gemini API key not configured" },
         { status: 500 }
       );
     }
@@ -40,15 +49,32 @@ export async function POST(request: NextRequest) {
       };
       addVariant(variant);
       savedVariants.push(variant);
+
+      // Save to history
+      const baseUrl = request.nextUrl.origin;
+      try {
+        await axios.post(`${baseUrl}/api/history`, {
+          type: "variant",
+          data: {
+            ...variant,
+            prompt,
+          },
+        });
+      } catch (historyError) {
+        console.error("Failed to save variant to history:", historyError);
+        // Don't fail the entire request if history save fails
+      }
     }
 
     return NextResponse.json({ variants: savedVariants });
   } catch (error) {
-    console.error('Error generating variants:', error);
+    console.error("Error generating variants:", error);
     return NextResponse.json(
-      { error: 'Failed to generate variants', details: (error as Error).message },
+      {
+        error: "Failed to generate variants",
+        details: (error as Error).message,
+      },
       { status: 500 }
     );
   }
 }
-
