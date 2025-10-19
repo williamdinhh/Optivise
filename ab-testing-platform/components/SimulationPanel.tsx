@@ -1,48 +1,99 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import axios from 'axios';
+import { useState } from "react";
+import axios from "axios";
 
 export default function SimulationPanel() {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   const handleSimulate = async () => {
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
-      const response = await axios.post('/api/simulate');
-      setMessage(`Successfully simulated user data for ${response.data.results.length} variant(s)! Run analysis to see results.`);
+      const response = await axios.post("/api/simulate");
+      setMessage(
+        `Successfully simulated user data for ${response.data.results.length} variant(s)! Run analysis to see results.`
+      );
     } catch (error: any) {
-      console.error('Error simulating data:', error);
-      setMessage(error.response?.data?.error || 'Failed to simulate data');
+      console.error("Error simulating data:", error);
+      setMessage(error.response?.data?.error || "Failed to simulate data");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">User Data Simulation</h2>
-      <p className="text-gray-600 mb-4">
-        Generate synthetic user interaction data for all active variants to test their performance.
-      </p>
-      
+    <div>
+      <div
+        style={{
+          padding: "15px",
+          border: "1px solid #ccc",
+          marginBottom: "20px",
+        }}
+      >
+        <h4
+          style={{ fontSize: "14px", fontWeight: "bold", margin: "0 0 10px 0" }}
+        >
+          Simulation Parameters
+        </h4>
+        <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "13px" }}>
+          <li>100+ users per variant</li>
+          <li>5-15 actions per user</li>
+          <li>Realistic behavior patterns</li>
+        </ul>
+      </div>
+
       <button
         onClick={handleSimulate}
         disabled={loading}
-        className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+        style={{
+          width: "100%",
+          padding: "15px",
+          fontSize: "16px",
+          fontWeight: "bold",
+          border: "2px solid #000",
+          background: loading ? "#ccc" : "#fff",
+          cursor: loading ? "not-allowed" : "pointer",
+        }}
       >
-        {loading ? 'Simulating...' : 'Run Simulation'}
+        {loading ? "Running Simulation..." : "Run Simulation"}
       </button>
 
       {message && (
-        <div className={`mt-4 p-3 rounded-lg ${message.includes('Failed') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+        <div
+          style={{
+            marginTop: "15px",
+            padding: "10px",
+            border: "1px solid #000",
+            background: message.includes("Failed") ? "#ffe0e0" : "#e0ffe0",
+            fontSize: "14px",
+          }}
+        >
           {message}
         </div>
       )}
+
+      <div
+        style={{
+          marginTop: "20px",
+          padding: "15px",
+          border: "1px solid #ccc",
+          background: "#f9f9f9",
+        }}
+      >
+        <h4
+          style={{ fontSize: "14px", fontWeight: "bold", margin: "0 0 10px 0" }}
+        >
+          Next Steps
+        </h4>
+        <ol style={{ margin: 0, paddingLeft: "20px", fontSize: "13px" }}>
+          <li>Run simulation to generate test data</li>
+          <li>Navigate to Analytics tab for metrics</li>
+          <li>Run terminal analysis for detailed insights</li>
+        </ol>
+      </div>
     </div>
   );
 }
-

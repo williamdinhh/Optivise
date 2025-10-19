@@ -1,20 +1,23 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Variant } from '@/types';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { Variant } from "@/types";
+import axios from "axios";
 
 interface ModeratorDashboardProps {
   onVariantChange: (variant: Variant) => void;
   currentVariant: Variant;
 }
 
-export default function ModeratorDashboard({ onVariantChange, currentVariant }: ModeratorDashboardProps) {
+export default function ModeratorDashboard({
+  onVariantChange,
+  currentVariant,
+}: ModeratorDashboardProps) {
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [variantCount, setVariantCount] = useState(2);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     loadVariants();
@@ -22,187 +25,288 @@ export default function ModeratorDashboard({ onVariantChange, currentVariant }: 
 
   const loadVariants = async () => {
     try {
-      const response = await axios.get('/api/variants');
+      const response = await axios.get("/api/variants");
       setVariants(response.data.variants);
     } catch (error) {
-      console.error('Error loading variants:', error);
-      setMessage('Failed to load variants');
+      console.error("Error loading variants:", error);
+      setMessage("Failed to load variants");
     }
   };
 
   const handleGenerateVariants = async () => {
     if (!prompt.trim()) {
-      setMessage('Please enter a prompt');
+      setMessage("Please enter a prompt");
       return;
     }
 
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
-      const response = await axios.post('/api/variants/generate', {
+      const response = await axios.post("/api/variants/generate", {
         prompt,
         currentHtml: currentVariant.html,
         currentCss: currentVariant.css,
         variantCount,
       });
 
-      setMessage(`Successfully generated ${response.data.variants.length} variant(s)!`);
-      setPrompt('');
+      setMessage(
+        `Successfully generated ${response.data.variants.length} variant(s)!`
+      );
+      setPrompt("");
       await loadVariants();
     } catch (error: any) {
-      console.error('Error generating variants:', error);
-      setMessage(error.response?.data?.error || 'Failed to generate variants');
+      console.error("Error generating variants:", error);
+      setMessage(error.response?.data?.error || "Failed to generate variants");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteVariant = async (variantId: string) => {
-    if (!confirm('Are you sure you want to delete this variant?')) {
+    if (!confirm("Are you sure you want to delete this variant?")) {
       return;
     }
 
     try {
-      await axios.delete('/api/variants', { data: { variantId } });
-      setMessage('Variant deleted successfully');
+      await axios.delete("/api/variants", { data: { variantId } });
+      setMessage("Variant deleted successfully");
       await loadVariants();
     } catch (error: any) {
-      console.error('Error deleting variant:', error);
-      setMessage(error.response?.data?.error || 'Failed to delete variant');
+      console.error("Error deleting variant:", error);
+      setMessage(error.response?.data?.error || "Failed to delete variant");
     }
   };
 
   const handleToggleVariant = async (variant: Variant) => {
     try {
-      await axios.patch('/api/variants', {
+      await axios.patch("/api/variants", {
         variantId: variant.id,
         updates: { isActive: !variant.isActive },
       });
       await loadVariants();
     } catch (error: any) {
-      console.error('Error toggling variant:', error);
-      setMessage(error.response?.data?.error || 'Failed to toggle variant');
+      console.error("Error toggling variant:", error);
+      setMessage(error.response?.data?.error || "Failed to toggle variant");
     }
   };
 
   const handleAutoGenerate = async () => {
     const autoPrompts = [
-      'Make the call-to-action button more prominent and eye-catching',
-      'Improve the hero section with better visual hierarchy',
-      'Optimize the layout for higher conversion rates',
+      "Make the call-to-action button more prominent and eye-catching",
+      "Improve the hero section with better visual hierarchy",
+      "Optimize the layout for higher conversion rates",
     ];
 
-    const randomPrompt = autoPrompts[Math.floor(Math.random() * autoPrompts.length)];
+    const randomPrompt =
+      autoPrompts[Math.floor(Math.random() * autoPrompts.length)];
     setPrompt(randomPrompt);
-    
-    // Trigger generation after setting prompt
+
     setTimeout(() => {
       handleGenerateVariants();
     }, 100);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">AI Variant Generator</h2>
-        
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Describe the changes you want to make:
+    <div>
+      {/* Generation Form */}
+      <div
+        style={{
+          marginBottom: "30px",
+          padding: "15px",
+          border: "1px solid #ccc",
+        }}
+      >
+        <div style={{ marginBottom: "15px" }}>
+          <label
+            style={{
+              display: "block",
+              fontSize: "14px",
+              fontWeight: "bold",
+              marginBottom: "8px",
+            }}
+          >
+            Describe changes:
           </label>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="e.g., Make the signup button larger and change it to green"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            rows={3}
+            placeholder="e.g., Make the signup button larger and green"
+            style={{
+              width: "100%",
+              minHeight: "80px",
+              padding: "10px",
+              fontSize: "14px",
+              border: "1px solid #000",
+              fontFamily: "inherit",
+            }}
           />
+          <div style={{ fontSize: "12px", marginTop: "5px" }}>
+            Be specific about what you want to change
+          </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Number of variants to generate:
+        <div style={{ marginBottom: "15px" }}>
+          <label
+            style={{
+              display: "block",
+              fontSize: "14px",
+              fontWeight: "bold",
+              marginBottom: "8px",
+            }}
+          >
+            Number of variants:
           </label>
-          <input
-            type="number"
-            min="1"
-            max="3"
+          <select
             value={variantCount}
             onChange={(e) => setVariantCount(Number(e.target.value))}
-            className="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+            style={{
+              padding: "8px",
+              fontSize: "14px",
+              border: "1px solid #000",
+            }}
+          >
+            <option value={1}>1 variant</option>
+            <option value={2}>2 variants</option>
+            <option value={3}>3 variants</option>
+          </select>
         </div>
 
-        <div className="flex gap-3">
+        <div style={{ display: "flex", gap: "10px" }}>
           <button
             onClick={handleGenerateVariants}
             disabled={loading}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            style={{
+              padding: "10px 20px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              border: "2px solid #000",
+              background: loading ? "#ccc" : "#fff",
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
           >
-            {loading ? 'Generating...' : 'Generate Variants'}
+            {loading ? "Generating..." : "Generate Variants"}
           </button>
           <button
             onClick={handleAutoGenerate}
             disabled={loading}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            style={{
+              padding: "10px 20px",
+              fontSize: "14px",
+              border: "1px solid #000",
+              background: loading ? "#ccc" : "#fff",
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
           >
-            Auto-Generate Optimal Variants
+            Auto-Generate
           </button>
         </div>
 
         {message && (
-          <div className={`mt-4 p-3 rounded-lg ${message.includes('Failed') || message.includes('error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+          <div
+            style={{
+              marginTop: "15px",
+              padding: "10px",
+              border: "1px solid #000",
+              background: message.includes("Failed") ? "#ffe0e0" : "#e0ffe0",
+              fontSize: "14px",
+            }}
+          >
             {message}
           </div>
         )}
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Variants ({variants.length})</h2>
-        
-        <div className="space-y-3">
+      {/* Variants List */}
+      <div style={{ padding: "15px", border: "1px solid #ccc" }}>
+        <h4
+          style={{
+            fontSize: "14px",
+            fontWeight: "bold",
+            marginTop: 0,
+            marginBottom: "15px",
+          }}
+        >
+          Active Variants ({variants.length})
+        </h4>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {variants.map((variant) => (
             <div
               key={variant.id}
-              className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                currentVariant.id === variant.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              } ${!variant.isActive ? 'opacity-50' : ''}`}
+              style={{
+                padding: "15px",
+                border:
+                  currentVariant.id === variant.id
+                    ? "2px solid #000"
+                    : "1px solid #ccc",
+                background:
+                  currentVariant.id === variant.id ? "#f5f5f5" : "#fff",
+                cursor: "pointer",
+                opacity: variant.isActive ? 1 : 0.5,
+              }}
+              onClick={() => onVariantChange(variant)}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1" onClick={() => onVariantChange(variant)}>
-                  <h3 className="font-semibold text-lg text-gray-800">{variant.name}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{variant.description}</p>
-                  <div className="flex gap-2 mt-2">
-                    <span className={`text-xs px-2 py-1 rounded ${variant.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                      {variant.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                    {variant.metrics && (
-                      <span className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700">
-                        CTR: {variant.metrics.clickThroughRate.toFixed(2)}%
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "start",
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <div style={{ marginBottom: "8px" }}>
+                    <strong style={{ fontSize: "14px" }}>{variant.name}</strong>
+                    {currentVariant.id === variant.id && (
+                      <span style={{ marginLeft: "10px", fontSize: "12px" }}>
+                        [CURRENT]
                       </span>
                     )}
+                    <span style={{ marginLeft: "10px", fontSize: "12px" }}>
+                      [{variant.isActive ? "Active" : "Inactive"}]
+                    </span>
                   </div>
+                  <p style={{ fontSize: "13px", margin: "0 0 8px 0" }}>
+                    {variant.description}
+                  </p>
+                  {variant.metrics && (
+                    <div style={{ fontSize: "12px" }}>
+                      CTR: {variant.metrics.clickThroughRate.toFixed(2)}% |
+                      Conv: {variant.metrics.conversionRate.toFixed(2)}%
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-2 ml-4">
+                <div
+                  style={{ display: "flex", gap: "5px", marginLeft: "15px" }}
+                >
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleVariant(variant);
                     }}
-                    className="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+                    style={{
+                      padding: "5px 10px",
+                      fontSize: "12px",
+                      border: "1px solid #000",
+                      background: "#fff",
+                      cursor: "pointer",
+                    }}
                   >
-                    {variant.isActive ? 'Deactivate' : 'Activate'}
+                    {variant.isActive ? "Deactivate" : "Activate"}
                   </button>
-                  {variant.id !== 'original' && (
+                  {variant.id !== "original" && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteVariant(variant.id);
                       }}
-                      className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                      style={{
+                        padding: "5px 10px",
+                        fontSize: "12px",
+                        border: "1px solid #000",
+                        background: "#fff",
+                        cursor: "pointer",
+                      }}
                     >
                       Delete
                     </button>
@@ -216,4 +320,3 @@ export default function ModeratorDashboard({ onVariantChange, currentVariant }: 
     </div>
   );
 }
-
