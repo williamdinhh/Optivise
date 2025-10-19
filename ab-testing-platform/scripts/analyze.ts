@@ -122,6 +122,16 @@ function printAnalysis(analysis: AnalysisResult) {
   console.log('\n\x1b[1m🤖 AI ANALYSIS\x1b[0m');
   console.log('═'.repeat(100));
   
+  // Show winner prominently
+  if (analysis.winner) {
+    const winnerVariant = analysis.variants.find(v => v.id === analysis.winner);
+    if (winnerVariant) {
+      console.log('\n\x1b[42m\x1b[30m                                                                    \x1b[0m');
+      console.log('\x1b[42m\x1b[30m  🏆  RECOMMENDED VARIANT: ' + winnerVariant.name.toUpperCase().padEnd(40) + '\x1b[0m');
+      console.log('\x1b[42m\x1b[30m                                                                    \x1b[0m');
+    }
+  }
+  
   console.log('\n\x1b[33m📋 Summary:\x1b[0m');
   console.log(`   ${analysis.summary}`);
   
@@ -159,6 +169,33 @@ async function main() {
     if (!analysis.variants || analysis.variants.length === 0) {
       console.error('\x1b[31m❌ No variants with metrics found. Please run a simulation first.\x1b[0m');
       process.exit(1);
+    }
+    
+    // Check if using fallback data and warn the user
+    const isUsingFallbackData = analysis.source === 'simulated_fallback' || 
+                                (analysis as any).warning;
+    const isUsingLocalEvents = analysis.source === 'local_events_real';
+    
+    if (isUsingFallbackData) {
+      console.log('\n\x1b[43m\x1b[30m                                                                           \x1b[0m');
+      console.log('\x1b[43m\x1b[30m  ⚠️  WARNING: USING SIMULATED FALLBACK DATA (NOT REAL USER DATA!)        \x1b[0m');
+      console.log('\x1b[43m\x1b[30m                                                                           \x1b[0m');
+      console.log('\n\x1b[33m📋 This data is randomly generated for testing purposes.\x1b[0m');
+      console.log('\x1b[33m💡 To use REAL data:\x1b[0m');
+      console.log('\x1b[33m   1. Restart your dev server (npm run dev)\x1b[0m');
+      console.log('\x1b[33m   2. Open http://localhost:3000 and click "Start Capture"\x1b[0m');
+      console.log('\x1b[33m   3. Click buttons multiple times\x1b[0m');
+      console.log('\x1b[33m   4. Run this analysis again\x1b[0m\n');
+    } else if (isUsingLocalEvents) {
+      console.log('\n\x1b[42m\x1b[30m                                                    \x1b[0m');
+      console.log('\x1b[42m\x1b[30m  ✅  USING REAL DATA FROM YOUR ACTUAL CLICKS!     \x1b[0m');
+      console.log('\x1b[42m\x1b[30m                                                    \x1b[0m');
+      const eventCount = (analysis as any).eventCount || 0;
+      console.log(`\x1b[32m📊 Total events tracked: ${eventCount}\x1b[0m\n`);
+    } else {
+      console.log('\n\x1b[42m\x1b[30m                                                    \x1b[0m');
+      console.log('\x1b[42m\x1b[30m  ✅  USING REAL STATSIG DATA FROM ACTUAL USERS!   \x1b[0m');
+      console.log('\x1b[42m\x1b[30m                                                    \x1b[0m\n');
     }
     
     // Ask user how they want to view the data

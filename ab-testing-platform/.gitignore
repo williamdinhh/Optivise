@@ -42,3 +42,8 @@ next-env.d.ts
 
 # data directory
 /data/
+
+# System files
+.DS_Store
+*.log
+*.tmp

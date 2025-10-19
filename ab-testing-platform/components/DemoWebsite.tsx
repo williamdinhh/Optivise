@@ -2,12 +2,39 @@
 
 import { useEffect, useRef } from 'react';
 import { useStatsigClient } from '@statsig/react-bindings';
+import axios from 'axios';
 
 interface DemoWebsiteProps {
   html: string;
   css: string;
   variantId: string;
   captureEnabled?: boolean;
+}
+
+// Helper function to log events to both Statsig and local tracker
+async function logDualEvent(
+  client: any,
+  eventName: string,
+  variantId: string,
+  metadata: Record<string, any>
+) {
+  // Log to Statsig
+  if (client) {
+    client.logEvent(eventName, metadata.button_text || metadata.element_text || variantId, metadata);
+  }
+  
+  // Log to local tracker
+  try {
+    await axios.post('/api/events/log', {
+      eventName,
+      variantId,
+      metadata,
+    });
+  } catch (error) {
+    console.error('Error logging to local tracker:', error);
+  }
+  
+  console.log('📊 Event logged:', eventName, metadata);
 }
 
 export default function DemoWebsite({ html, css, variantId, captureEnabled = false }: DemoWebsiteProps) {
@@ -46,13 +73,9 @@ export default function DemoWebsite({ html, css, variantId, captureEnabled = fal
 
     // Log impression if capture is enabled
     if (captureEnabled && client) {
-      client.logEvent('variant_impression', variantId, {
+      logDualEvent(client, 'variant_impression', variantId, {
         variant_id: variantId,
         timestamp: Date.now(),
-      });
-      console.log('📊 Statsig Event: variant_impression', {
-        variant_id: variantId,
-        timestamp: new Date().toISOString()
       });
     }
 
@@ -70,8 +93,7 @@ export default function DemoWebsite({ html, css, variantId, captureEnabled = fal
             button_index: index,
             timestamp: Date.now(),
           };
-          client.logEvent('button_click', button.textContent || `button_${index}`, eventData);
-          console.log('📊 Statsig Event: button_click', eventData);
+          logDualEvent(client, 'button_click', variantId, eventData);
         }
       });
     });
@@ -92,8 +114,7 @@ export default function DemoWebsite({ html, css, variantId, captureEnabled = fal
               timestamp: Date.now(),
             };
             
-            client.logEvent('element_click', elementText || `${elementType}_${index}`, eventData);
-            console.log('📊 Statsig Event: element_click', eventData);
+            logDualEvent(client, 'element_click', variantId, eventData);
           }
         });
       });

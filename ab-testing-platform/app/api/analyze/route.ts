@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     // Fetch real-time metrics from Statsig instead of using stored synthetic data
     const baseUrl = request.nextUrl.origin;
     const metricsResponse = await axios.get(`${baseUrl}/api/statsig/metrics`);
-    const { metrics: metricsMap, variants: variantsList } = metricsResponse.data;
+    const { metrics: metricsMap, variants: variantsList, source, warning } = metricsResponse.data;
 
     if (!variantsList || variantsList.length === 0) {
       return NextResponse.json(
@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
       ...analysis,
       metrics: metricsMap,
       variants: variantsList,
-      source: 'statsig', // Indicates metrics came from Statsig
+      source: source, // Pass through the source from statsig/metrics endpoint
+      warning: warning, // Pass through any warnings
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

@@ -17,7 +17,7 @@ const defaultConfig: SiteConfig = {
   originalVariant: {
     id: "original",
     name: "Original",
-    description: "Airbnb-style vacation rental platform",
+    description: "Stripe payments platform",
     html: `
       <div class="modern-container">
         <!-- Header -->
