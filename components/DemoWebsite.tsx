@@ -116,7 +116,7 @@ export default function DemoWebsite({
           const eventName =
             elementType === "button" ? "button_click" : "element_click";
 
-          const eventData = {
+          const eventData: any = {
             variant_id: variantId,
             element_type: elementType,
             element_text: elementText,
