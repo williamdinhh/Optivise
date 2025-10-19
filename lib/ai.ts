@@ -315,21 +315,27 @@ Variant: ${v.name} (ID: ${v.id})
     
     // Handle quota exceeded error
     if (error.message && error.message.includes("quota")) {
-      console.warn("⚠️  Gemini API quota exceeded - providing fallback analysis");
+      console.warn("⚠️  Gemini API quota exceeded - providing intelligent fallback analysis");
       
-      // Return a fallback analysis based on the data
+      // Find the variant with the highest conversion rate (same logic as main fallback)
+      const bestVariant = variants.reduce((best, current) => {
+        const bestConversionRate = best.metrics?.conversionRate || 0;
+        const currentConversionRate = current.metrics?.conversionRate || 0;
+        return currentConversionRate > bestConversionRate ? current : best;
+      });
+      
       const fallbackAnalysis = {
-        winner: variants.length > 0 ? variants[0].id : null,
-        summary: "AI analysis unavailable due to API quota limits. Please try again later or upgrade your Gemini API plan.",
+        winner: bestVariant.id,
+        summary: `Analysis completed using fallback calculation: ${bestVariant.name} performed best with ${bestVariant.metrics?.conversionRate?.toFixed(2)}% conversion rate. AI analysis was unavailable due to quota limits.`,
         insights: [
-          "API quota exceeded - analysis unavailable",
-          "Consider upgrading your Gemini API plan",
-          "Try again when quota resets"
+          `Best performing variant: ${bestVariant.name}`,
+          `Highest conversion rate: ${bestVariant.metrics?.conversionRate?.toFixed(2)}%`,
+          "Analysis based on conversion rate comparison"
         ],
         recommendations: [
-          "Try again in a few minutes when quota resets",
-          "Consider upgrading your Gemini API plan for higher limits",
-          "Check your API usage in Google AI Studio"
+          "Consider upgrading your Gemini API plan for AI-powered insights",
+          "Monitor conversion rates to validate this analysis",
+          "Try running analysis again when quota resets"
         ]
       };
       
