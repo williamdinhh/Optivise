@@ -1,4 +1,9 @@
 # Optivise - AI-Powered A/B Testing Platform
+### 👨‍💻 Made By
+
+**William Dinh** – CS Student @ University of Washington  
+**Sidiq Moltafet** – CS Student @ University of Washington
+
 # Clone and setup
 
 git clone <your-repo-url> </br>
