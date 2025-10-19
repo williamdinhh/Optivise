@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import DemoWebsite from "@/components/DemoWebsite";
 import ModeratorDashboard from "@/components/ModeratorDashboard";
-import SimulationPanel from "@/components/SimulationPanel";
+import CapturePanel from "@/components/CapturePanel";
 import { Variant } from "@/types";
 import axios from "axios";
 import Link from "next/link";
@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [allVariants, setAllVariants] = useState<Variant[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("overview");
+  const [isCapturing, setIsCapturing] = useState(false);
 
   useEffect(() => {
     loadConfig();
@@ -371,7 +372,7 @@ export default function Dashboard() {
         {/* TESTING & ANALYTICS SECTION (MERGED) */}
         {activeSection === "testing" && (
           <div>
-            {/* User Simulation */}
+            {/* Statsig Event Capture */}
             <section
               style={{
                 marginBottom: "30px",
@@ -382,12 +383,15 @@ export default function Dashboard() {
               <h3
                 style={{ fontSize: "16px", fontWeight: "bold", marginTop: 0 }}
               >
-                User Simulation
+                Statsig Event Capture
               </h3>
               <p style={{ fontSize: "14px", marginBottom: "20px" }}>
-                Generate synthetic user data for testing
+                Track real user interactions in real-time with Statsig
               </p>
-              <SimulationPanel />
+              <CapturePanel 
+                onCaptureToggle={setIsCapturing}
+                isCapturing={isCapturing}
+              />
             </section>
 
             {/* Analytics */}
@@ -486,6 +490,8 @@ export default function Dashboard() {
                 <DemoWebsite
                   html={currentVariant.html}
                   css={currentVariant.css}
+                  variantId={currentVariant.id}
+                  captureEnabled={isCapturing}
                 />
               </div>
             </section>

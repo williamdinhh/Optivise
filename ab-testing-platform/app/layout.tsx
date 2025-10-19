@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import StatsigProvider from "@/components/StatsigProvider";
 
 export const metadata: Metadata = {
   title: "AI A/B Testing Platform",
-  description: "AI-powered A/B testing with synthetic user data and terminal analytics",
+  description: "AI-powered A/B testing with Statsig real-time analytics",
 };
 
 export default function RootLayout({
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        {children}
+        <StatsigProvider>
+          {children}
+        </StatsigProvider>
       </body>
     </html>
   );
