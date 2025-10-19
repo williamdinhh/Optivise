@@ -52,6 +52,8 @@ export default function DemoWebsite({
   const containerRef = useRef<HTMLDivElement>(null);
   const shadowRootRef = useRef<ShadowRoot | null>(null);
   const { client } = useStatsigClient();
+  const sessionStartTime = useRef<number>(Date.now());
+  const hasInteracted = useRef<boolean>(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -86,9 +88,13 @@ export default function DemoWebsite({
 
     // Log impression if capture is enabled
     if (captureEnabled && client) {
+      sessionStartTime.current = Date.now();
+      hasInteracted.current = false;
+
       logDualEvent(client, "variant_impression", variantId, {
         variant_id: variantId,
         timestamp: Date.now(),
+        session_start: sessionStartTime.current,
       });
     }
 
@@ -112,6 +118,8 @@ export default function DemoWebsite({
 
         // Track click event if capture is enabled
         if (captureEnabled && client) {
+          hasInteracted.current = true;
+
           // Determine event name based on element type
           const eventName =
             elementType === "button" ? "button_click" : "element_click";
@@ -122,6 +130,8 @@ export default function DemoWebsite({
             element_text: elementText,
             element_index: index,
             timestamp: Date.now(),
+            session_start: sessionStartTime.current,
+            time_on_page: Date.now() - sessionStartTime.current,
           };
 
           // Add button-specific data if it's a button
@@ -140,6 +150,27 @@ export default function DemoWebsite({
       });
     });
   }, [html, css, variantId, captureEnabled, client]);
+
+  // Track page unload for bounce rate calculation
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (captureEnabled && client && !hasInteracted.current) {
+        const timeOnPage = Date.now() - sessionStartTime.current;
+
+        // Log bounce event (impression without interaction)
+        logDualEvent(client, "page_bounce", variantId, {
+          variant_id: variantId,
+          timestamp: Date.now(),
+          session_start: sessionStartTime.current,
+          time_on_page: timeOnPage,
+          bounced: true,
+        });
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [captureEnabled, client, variantId]);
 
   return (
     <div

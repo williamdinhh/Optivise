@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
+import InteractiveChart from "./InteractiveChart";
 
 interface VariantMetrics {
   impressions: number;
@@ -426,7 +427,7 @@ export default function AnalyticsPanel({
                         textAlign: "right",
                       }}
                     >
-                      {variantMetrics.bounceRate.toFixed(2)}%
+                      {variantMetrics.bounceRate.toFixed(1)}%
                     </td>
                   </tr>
                 );
@@ -444,141 +445,110 @@ export default function AnalyticsPanel({
     const variants = analysis.variants;
     const metrics = analysis.metrics;
 
-    // Find max values for scaling
-    const maxCTR = Math.max(
-      ...variants.map((v) => metrics[v.id].clickThroughRate)
-    );
-    const maxConversion = Math.max(
-      ...variants.map((v) => metrics[v.id].conversionRate)
-    );
-    const maxTime = Math.max(
-      ...variants.map((v) => metrics[v.id].avgTimeOnPage)
-    );
+    // Generate colors for each variant
+    const colors = [
+      "#007bff", // Blue
+      "#28a745", // Green
+      "#dc3545", // Red
+      "#ffc107", // Yellow
+      "#17a2b8", // Cyan
+      "#6610f2", // Purple
+    ];
+
+    // Prepare data for CTR chart
+    const ctrData = variants.map((variant, index) => ({
+      label: variant.name,
+      value: metrics[variant.id].clickThroughRate,
+      color: colors[index % colors.length],
+      isWinner: variant.id === analysis.winner,
+    }));
+
+    // Prepare data for Conversion Rate chart
+    const conversionData = variants.map((variant, index) => ({
+      label: variant.name,
+      value: metrics[variant.id].conversionRate,
+      color: colors[index % colors.length],
+      isWinner: variant.id === analysis.winner,
+    }));
+
+    // Prepare data for Impressions chart
+    const impressionsData = variants.map((variant, index) => ({
+      label: variant.name,
+      value: metrics[variant.id].impressions,
+      color: colors[index % colors.length],
+      isWinner: variant.id === analysis.winner,
+    }));
+
+    // Prepare data for Clicks chart
+    const clicksData = variants.map((variant, index) => ({
+      label: variant.name,
+      value: metrics[variant.id].clicks,
+      color: colors[index % colors.length],
+      isWinner: variant.id === analysis.winner,
+    }));
+
+    // Prepare data for Avg Time on Page chart
+    const timeData = variants.map((variant, index) => ({
+      label: variant.name,
+      value: metrics[variant.id].avgTimeOnPage,
+      color: colors[index % colors.length],
+      isWinner: variant.id === analysis.winner,
+    }));
+
+    // Prepare data for Bounce Rate chart
+    const bounceData = variants.map((variant, index) => ({
+      label: variant.name,
+      value: metrics[variant.id].bounceRate,
+      color: colors[index % colors.length],
+      isWinner: variant.id === analysis.winner,
+    }));
 
     return (
       <div style={{ marginBottom: "30px" }}>
         <h4
-          style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "15px" }}
+          style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "20px" }}
         >
-          📈 Visual Comparisons
+          📈 Interactive Performance Charts
         </h4>
 
-        <div style={{ marginBottom: "20px" }}>
-          <h5
-            style={{
-              fontSize: "14px",
-              fontWeight: "bold",
-              marginBottom: "10px",
-            }}
-          >
-            Click-Through Rate (CTR):
-          </h5>
-          <div
-            style={{
-              fontFamily: "monospace",
-              fontSize: "12px",
-              lineHeight: "1.4",
-            }}
-          >
-            {variants.map((variant) => {
-              const metric = metrics[variant.id];
-              return (
-                <div
-                  key={variant.id}
-                  style={{
-                    color: variant.id === analysis.winner ? "#28a745" : "#333",
-                    fontWeight:
-                      variant.id === analysis.winner ? "bold" : "normal",
-                  }}
-                >
-                  {createBarChart(
-                    variant.name,
-                    metric.clickThroughRate,
-                    maxCTR
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+            gap: "20px",
+          }}
+        >
+          <InteractiveChart
+            title="📊 Click-Through Rate (CTR)"
+            data={ctrData}
+            unit="%"
+          />
 
-        <div style={{ marginBottom: "20px" }}>
-          <h5
-            style={{
-              fontSize: "14px",
-              fontWeight: "bold",
-              marginBottom: "10px",
-            }}
-          >
-            Conversion Rate:
-          </h5>
-          <div
-            style={{
-              fontFamily: "monospace",
-              fontSize: "12px",
-              lineHeight: "1.4",
-            }}
-          >
-            {variants.map((variant) => {
-              const metric = metrics[variant.id];
-              return (
-                <div
-                  key={variant.id}
-                  style={{
-                    color: variant.id === analysis.winner ? "#28a745" : "#333",
-                    fontWeight:
-                      variant.id === analysis.winner ? "bold" : "normal",
-                  }}
-                >
-                  {createBarChart(
-                    variant.name,
-                    metric.conversionRate,
-                    maxConversion
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+          <InteractiveChart
+            title="🎯 Conversion Rate"
+            data={conversionData}
+            unit="%"
+          />
 
-        <div>
-          <h5
-            style={{
-              fontSize: "14px",
-              fontWeight: "bold",
-              marginBottom: "10px",
-            }}
-          >
-            Average Time on Page:
-          </h5>
-          <div
-            style={{
-              fontFamily: "monospace",
-              fontSize: "12px",
-              lineHeight: "1.4",
-            }}
-          >
-            {variants.map((variant) => {
-              const metric = metrics[variant.id];
-              return (
-                <div
-                  key={variant.id}
-                  style={{
-                    color: variant.id === analysis.winner ? "#28a745" : "#333",
-                    fontWeight:
-                      variant.id === analysis.winner ? "bold" : "normal",
-                  }}
-                >
-                  {createBarChart(
-                    variant.name,
-                    metric.avgTimeOnPage,
-                    maxTime,
-                    "s"
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <InteractiveChart
+            title="👁️ Impressions"
+            data={impressionsData}
+            unit=""
+          />
+
+          <InteractiveChart title="🖱️ Total Clicks" data={clicksData} unit="" />
+
+          <InteractiveChart
+            title="⏱️ Average Time on Page"
+            data={timeData}
+            unit="s"
+          />
+
+          <InteractiveChart
+            title="📉 Bounce Rate (Lower is Better)"
+            data={bounceData}
+            unit="%"
+          />
         </div>
       </div>
     );

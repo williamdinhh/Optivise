@@ -4,10 +4,13 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 // Log API key status (without exposing the key)
 if (process.env.GEMINI_API_KEY) {
-  console.log('✅ Gemini API key is configured');
-  console.log('🔑 API Key starts with:', process.env.GEMINI_API_KEY.substring(0, 10) + '...');
+  console.log("✅ Gemini API key is configured");
+  console.log(
+    "🔑 API Key starts with:",
+    process.env.GEMINI_API_KEY.substring(0, 10) + "..."
+  );
 } else {
-  console.warn('⚠️  GEMINI_API_KEY not set - AI features will not work');
+  console.warn("⚠️  GEMINI_API_KEY not set - AI features will not work");
 }
 
 export default genAI;
@@ -250,7 +253,7 @@ Variant: ${v.name} (ID: ${v.id})
 - Click-through Rate: ${v.metrics.clickThroughRate.toFixed(2)}%
 - Conversion Rate: ${v.metrics.conversionRate.toFixed(2)}%
 - Avg Time on Page: ${v.metrics.avgTimeOnPage.toFixed(1)}s
-- Bounce Rate: ${v.metrics.bounceRate.toFixed(2)}%
+- Bounce Rate: ${v.metrics.bounceRate.toFixed(1)}%
 - Impressions: ${v.metrics.impressions}
 - Clicks: ${v.metrics.clicks}
 - Conversions: ${v.metrics.conversions}
@@ -265,9 +268,9 @@ Variant: ${v.name} (ID: ${v.id})
 
     const fullPrompt = `${systemPrompt}\n\nAnalyze these A/B test results and determine which variant performed best. You MUST choose a winner based on the available data, even if the differences are small or the data is limited:\n\n${metricsText}\n\nRemember: Always provide a winner. Consider the overall performance trends and pick the variant that shows the most promise.`;
 
-    console.log('🤖 Sending analysis prompt to AI with data:');
-    console.log('📊 Variants count:', variants.length);
-    console.log('📊 Metrics data:', metricsText);
+    console.log("🤖 Sending analysis prompt to AI with data:");
+    console.log("📊 Variants count:", variants.length);
+    console.log("📊 Metrics data:", metricsText);
 
     const result = await model.generateContent(fullPrompt);
     const response = result.response;
@@ -285,26 +288,34 @@ Variant: ${v.name} (ID: ${v.id})
 
     // Ensure we always have a winner - if AI returns null, pick the best performing variant as fallback
     if (!analysis.winner && variants.length > 0) {
-      console.warn("⚠️  AI did not return a winner, calculating fallback based on metrics");
-      
+      console.warn(
+        "⚠️  AI did not return a winner, calculating fallback based on metrics"
+      );
+
       // Find the variant with the highest conversion rate
       const bestVariant = variants.reduce((best, current) => {
         const bestConversionRate = best.metrics?.conversionRate || 0;
         const currentConversionRate = current.metrics?.conversionRate || 0;
         return currentConversionRate > bestConversionRate ? current : best;
       });
-      
+
       analysis.winner = bestVariant.id;
-      analysis.summary = `Fallback analysis: ${bestVariant.name} selected based on highest conversion rate (${bestVariant.metrics?.conversionRate?.toFixed(2)}%). AI analysis was incomplete.`;
+      analysis.summary = `Fallback analysis: ${
+        bestVariant.name
+      } selected based on highest conversion rate (${bestVariant.metrics?.conversionRate?.toFixed(
+        2
+      )}%). AI analysis was incomplete.`;
       analysis.insights = [
         "AI analysis failed - using fallback calculation",
-        `Best conversion rate: ${bestVariant.metrics?.conversionRate?.toFixed(2)}%`,
-        "Consider reviewing the data quality"
+        `Best conversion rate: ${bestVariant.metrics?.conversionRate?.toFixed(
+          2
+        )}%`,
+        "Consider reviewing the data quality",
       ];
       analysis.recommendations = [
         "Verify the data quality and metrics",
         "Try running the analysis again",
-        "Check if all variants have sufficient data"
+        "Check if all variants have sufficient data",
       ];
     }
 
@@ -312,36 +323,44 @@ Variant: ${v.name} (ID: ${v.id})
   } catch (error: any) {
     console.error("Error analyzing variants:", error);
     console.error("Error details:", error.message);
-    
+
     // Handle quota exceeded error
     if (error.message && error.message.includes("quota")) {
-      console.warn("⚠️  Gemini API quota exceeded - providing intelligent fallback analysis");
-      
+      console.warn(
+        "⚠️  Gemini API quota exceeded - providing intelligent fallback analysis"
+      );
+
       // Find the variant with the highest conversion rate (same logic as main fallback)
       const bestVariant = variants.reduce((best, current) => {
         const bestConversionRate = best.metrics?.conversionRate || 0;
         const currentConversionRate = current.metrics?.conversionRate || 0;
         return currentConversionRate > bestConversionRate ? current : best;
       });
-      
+
       const fallbackAnalysis = {
         winner: bestVariant.id,
-        summary: `Analysis completed using fallback calculation: ${bestVariant.name} performed best with ${bestVariant.metrics?.conversionRate?.toFixed(2)}% conversion rate. AI analysis was unavailable due to quota limits.`,
+        summary: `Analysis completed using fallback calculation: ${
+          bestVariant.name
+        } performed best with ${bestVariant.metrics?.conversionRate?.toFixed(
+          2
+        )}% conversion rate. AI analysis was unavailable due to quota limits.`,
         insights: [
           `Best performing variant: ${bestVariant.name}`,
-          `Highest conversion rate: ${bestVariant.metrics?.conversionRate?.toFixed(2)}%`,
-          "Analysis based on conversion rate comparison"
+          `Highest conversion rate: ${bestVariant.metrics?.conversionRate?.toFixed(
+            2
+          )}%`,
+          "Analysis based on conversion rate comparison",
         ],
         recommendations: [
           "Consider upgrading your Gemini API plan for AI-powered insights",
           "Monitor conversion rates to validate this analysis",
-          "Try running analysis again when quota resets"
-        ]
+          "Try running analysis again when quota resets",
+        ],
       };
-      
+
       return fallbackAnalysis;
     }
-    
+
     throw error;
   }
 }

@@ -37,7 +37,7 @@ Get AI-powered insights with:
 - Winner identification and statistical analysis
 - Natural language recommendations
 - Actionable next steps
-- Terminal-based visualizations
+- Interactive web-based visualizations
 
 ## 🎨 Key Features
 
@@ -53,11 +53,12 @@ Get AI-powered insights with:
 - **Real-time Switching**: Instant variant comparison
 -  See exactly what users will experience
 
-### Synthetic User Simulation (when no impressions / data are recorded only)
-- **Realistic Metrics**: Statistically plausible data
-- **7 Key Metrics**: Impressions, CTR, conversions, time on page, bounce rate
-- **Meaningful Variation**: Different performance across variants
-- **Instant Generation**: < 1 second simulation time
+### Real-Time Event Tracking
+- **Automatic Impressions**: Tracked on every page load
+- **Click Detection**: Buttons and interactive elements
+- **5 Key Metrics**: Impressions, Clicks, CTR, Conversions, Conversion Rate
+- **Memory Storage**: Fast, reliable event logging
+- **Live Analytics**: Real-time performance data
 
 
 ## 🎯 How to Use
@@ -229,7 +230,7 @@ Once connected to GitHub:
 - Branch deployments for testing
 
 ## 🔮 Future Enhancements
-- Allow moderators or users to upload their own websites, rather than actually having to modify the code of website in the files
 
+- Allow moderators or users to upload their own websites, rather than actually having to modify the code of website in the files
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/optivise)
