@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllVariants } from '@/lib/storage';
 import { analyzeVariants } from '@/lib/ai';
+import axios from 'axios';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,35 +12,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const variants = getAllVariants().filter(v => v.isActive && v.metrics);
+    // Fetch real-time metrics from Statsig instead of using stored synthetic data
+    const baseUrl = request.nextUrl.origin;
+    const metricsResponse = await axios.get(`${baseUrl}/api/statsig/metrics`);
+    const { metrics: metricsMap, variants: variantsList } = metricsResponse.data;
 
-    if (variants.length === 0) {
+    if (!variantsList || variantsList.length === 0) {
       return NextResponse.json(
         { error: 'No variants with metrics available for analysis' },
         { status: 400 }
       );
     }
 
-    // Prepare data for analysis
-    const variantsForAnalysis = variants.map(v => ({
+    // Prepare data for AI analysis using Statsig metrics
+    const variantsForAnalysis = variantsList.map((v: any) => ({
       id: v.id,
       name: v.name,
-      metrics: v.metrics!,
+      metrics: metricsMap[v.id],
     }));
 
-    // Get AI analysis
+    // Get AI analysis based on real Statsig data
     const analysis = await analyzeVariants(variantsForAnalysis);
-
-    // Include full metrics in response
-    const metricsMap: { [key: string]: any } = {};
-    variants.forEach(v => {
-      metricsMap[v.id] = v.metrics;
-    });
 
     return NextResponse.json({
       ...analysis,
       metrics: metricsMap,
-      variants: variants.map(v => ({ id: v.id, name: v.name })),
+      variants: variantsList,
+      source: 'statsig', // Indicates metrics came from Statsig
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Error analyzing variants:', error);
