@@ -210,22 +210,35 @@ export async function analyzeVariants(
   insights: string[];
   recommendations: string[];
 }> {
-  const systemPrompt = `You are a data analyst specializing in A/B testing and conversion rate optimization. 
-Analyze the performance metrics of multiple website variants and provide actionable insights.
+  const systemPrompt = `You are an expert data analyst specializing in A/B testing and conversion rate optimization. 
+Your task is to CAREFULLY analyze the performance metrics of multiple website variants and determine the TRUE winner based on data.
 
-IMPORTANT: You MUST always choose a winner. Even if the data is unclear, limited, or shows similar performance, you should still pick the variant that shows the most promise based on the available metrics. Consider factors like:
-- Higher conversion rates (even if small differences)
-- Better click-through rates
-- Lower bounce rates
-- More impressions/engagement
-- Overall trend direction
+CRITICAL ANALYSIS REQUIREMENTS:
+1. Examine ALL metrics for each variant thoroughly
+2. Compare performance across all variants systematically
+3. Calculate which variant has the BEST overall performance
+4. Base your decision on ACTUAL DATA, not assumptions or order
+5. Consider these factors in order of importance:
+   - Conversion Rate (most critical for business impact)
+   - Click-through Rate (user engagement)
+   - Time on Page (content engagement)
+   - Bounce Rate (content quality)
+   - Total conversions (absolute business impact)
+
+ANALYSIS PROCESS:
+- Compare each metric across all variants
+- Identify which variant leads in the most important metrics
+- If metrics are close, prioritize conversion rate and total conversions
+- Provide specific data points in your reasoning
+
+IMPORTANT: Do NOT default to the first variant. Analyze the actual data and choose the variant that truly performed best.
 
 Return ONLY a valid JSON object with this exact structure:
 {
-  "winner": "variant_id (MUST NOT be null - always pick a winner)",
-  "summary": "2-3 sentence overview of the results and why you chose this winner",
-  "insights": ["insight 1", "insight 2", "insight 3"],
-  "recommendations": ["recommendation 1", "recommendation 2", "recommendation 3"]
+  "winner": "variant_id (MUST be the actual best performing variant based on thorough data analysis)",
+  "summary": "Detailed explanation of why this variant won, including specific metrics and comparisons with other variants",
+  "insights": ["data-driven insight 1", "data-driven insight 2", "data-driven insight 3"],
+  "recommendations": ["actionable recommendation 1", "actionable recommendation 2", "actionable recommendation 3"]
 }
 
 Do not include any markdown formatting, explanations, or text outside the JSON object.`;
@@ -252,6 +265,10 @@ Variant: ${v.name} (ID: ${v.id})
 
     const fullPrompt = `${systemPrompt}\n\nAnalyze these A/B test results and determine which variant performed best. You MUST choose a winner based on the available data, even if the differences are small or the data is limited:\n\n${metricsText}\n\nRemember: Always provide a winner. Consider the overall performance trends and pick the variant that shows the most promise.`;
 
+    console.log('🤖 Sending analysis prompt to AI with data:');
+    console.log('📊 Variants count:', variants.length);
+    console.log('📊 Metrics data:', metricsText);
+
     const result = await model.generateContent(fullPrompt);
     const response = result.response;
     const responseText = response.text();
@@ -266,11 +283,29 @@ Variant: ${v.name} (ID: ${v.id})
 
     const analysis = JSON.parse(cleanedResponse);
 
-    // Ensure we always have a winner - if AI returns null, pick the first variant as fallback
+    // Ensure we always have a winner - if AI returns null, pick the best performing variant as fallback
     if (!analysis.winner && variants.length > 0) {
-      analysis.winner = variants[0].id;
-      analysis.summary =
-        analysis.summary + " (Winner selected based on available data)";
+      console.warn("⚠️  AI did not return a winner, calculating fallback based on metrics");
+      
+      // Find the variant with the highest conversion rate
+      const bestVariant = variants.reduce((best, current) => {
+        const bestConversionRate = best.metrics?.conversionRate || 0;
+        const currentConversionRate = current.metrics?.conversionRate || 0;
+        return currentConversionRate > bestConversionRate ? current : best;
+      });
+      
+      analysis.winner = bestVariant.id;
+      analysis.summary = `Fallback analysis: ${bestVariant.name} selected based on highest conversion rate (${bestVariant.metrics?.conversionRate?.toFixed(2)}%). AI analysis was incomplete.`;
+      analysis.insights = [
+        "AI analysis failed - using fallback calculation",
+        `Best conversion rate: ${bestVariant.metrics?.conversionRate?.toFixed(2)}%`,
+        "Consider reviewing the data quality"
+      ];
+      analysis.recommendations = [
+        "Verify the data quality and metrics",
+        "Try running the analysis again",
+        "Check if all variants have sufficient data"
+      ];
     }
 
     return analysis;
